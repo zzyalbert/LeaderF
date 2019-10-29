@@ -10,6 +10,19 @@ import itertools
 from .utils import *
 
 
+class PopupWindow(object):
+    def __init__(self, winid, buffer=None):
+        self._winid = winid
+        self._buffer = buffer
+
+    @property
+    def buffer(self):
+        return self._buffer
+
+    @buffer.setter
+    def buffer(self, buffer):
+        self._buffer = buffer
+
 #*****************************************************
 # LfInstance
 #*****************************************************
@@ -114,6 +127,116 @@ class LfInstance(object):
             lfCmd("autocmd WinEnter,FileType * call leaderf#colorscheme#setStatusline({}, '{}')"
                   .format(self.buffer.number, self._stl))
             lfCmd("augroup END")
+
+    def _createPopupWindow(self):
+
+        buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
+
+        if lfEval("has('nvim')") == '1':
+            self._win_pos = "floatwin"
+
+            width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
+            if width == 0:
+                width = int(lfEval("&columns"))//2
+            else:
+                width = min(width, int(lfEval("&columns")))
+            maxheight = int(lfEval("&lines - (line('w$') - line('.')) - 3"))
+            maxheight -= int(self._getInstance().window.height) - int(lfEval("(line('w$') - line('w0') + 1)"))
+            relative = 'editor'
+            anchor = "SW"
+            row = maxheight
+            lfCmd("call bufload(%d)" % buf_number)
+            buffer_len = len(vim.buffers[buf_number])
+            height = min(maxheight, buffer_len)
+            pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
+            if pos.lower() == 'center':
+                col = (int(lfEval("&columns")) - width) // 2
+            elif pos.lower() == 'left':
+                col = 0
+            elif pos.lower() == 'right':
+                col = int(lfEval("&columns")) - width
+            else:
+                relative = 'cursor'
+                row = 0
+                col = 0
+
+            if maxheight < int(lfEval("&lines"))//2 - 2:
+                anchor = "NW"
+                if relative == 'cursor':
+                    row = 1
+                else:
+                    row = maxheight + 1
+                height = min(int(lfEval("&lines")) - maxheight - 3, buffer_len)
+
+            config = {
+                    "relative": relative,
+                    "anchor"  : anchor,
+                    "height"  : height,
+                    "width"   : width,
+                    "row"     : row,
+                    "col"     : col
+                    }
+            self._preview_winid = int(lfEval("nvim_open_win(%d, 0, %s)" % (buf_number, str(config))))
+            lfCmd("call nvim_win_set_option(%d, 'number', v:true)" % self._preview_winid)
+            lfCmd("call nvim_win_set_option(%d, 'cursorline', v:true)" % self._preview_winid)
+            if buffer_len >= line_nr > 0:
+                lfCmd("""call nvim_win_set_cursor(%d, [%d, 1])""" % (self._preview_winid, line_nr))
+        else:
+            self._win_pos = "popup"
+
+            pos = lfEval("get(g:, 'Lf_PopupHorizontalPosition', 'center')")
+            if pos.lower() == 'center':
+                col = 0
+            elif pos.lower() == 'left':
+                col = 1
+            elif pos.lower() == 'right':
+                col = int(lfEval("&columns"))//2 + 2
+            else:
+                col = 0
+            width = int(lfEval("get(g:, 'Lf_PopupWidth', 0)"))
+            if width == 0:
+                maxwidth = int(lfEval("&columns"))//2 - 1
+            else:
+                maxwidth = min(width, int(lfEval("&columns")))
+
+            maxheight = 40
+            options = {
+                    "maxwidth":        maxwidth,
+                    "minwidth":        maxwidth,
+                    "maxheight":       maxheight,
+                    # "pos":             "botleft",
+                    # "line":            "cursor-1",
+                    # "col":             col,
+                    "padding":         [0, 0, 0, 1],
+                    # "border":          [1, 0, 0, 0],
+                    # "borderchars":     [' '],
+                    # "borderhighlight": ["Lf_hl_previewTitle"],
+                    "filter":          "leaderf#previewFilter",
+                    }
+            # if maxheight < int(lfEval("&lines"))//2 - 2:
+            #     maxheight = int(lfEval("&lines")) - maxheight - 5
+            #     del options["title"]
+            #     options["border"] = [0, 0, 1, 0]
+            #     options["maxheight"] = maxheight
+            #     options["minheight"] = maxheight
+
+            lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(options)))
+            self._popup_winid = int(lfEval("winid"))
+            lfCmd("call win_execute(%d, 'set number | set norelativenumber')" % self._popup_winid)
+
+
+            self._tabpage_object = vim.current.tabpage
+            self._buffer_object = vim.buffers[buf_number]
+            self._window_object = None
+            lfCmd("call bufload(%d)" % buf_number)
+            print(self._popup_winid, int(lfEval("win_id2win(winid)")), [w.number for w in vim.windows])
+            for w in vim.windows:
+                if w.number == int(lfEval("win_id2win(winid)")):
+                    self._window_object = w
+                    break
+
+            # if line_nr > 0:
+                # lfCmd("""call win_execute(%d, "exec 'norm! %dGzz' | redraw")""" % (self._preview_winid, line_nr))
 
     def _createBufWindow(self, win_pos):
         self._win_pos = win_pos
@@ -283,17 +406,23 @@ class LfInstance(object):
 
         self._before_enter()
 
-        if win_pos == 'fullScreen':
+        if win_pos == 'popup':
+            self._orig_win_nr = vim.current.window.number
+            self._orig_win_id = lfWinId(self._orig_win_nr)
+            self._createPopupWindow()
+        elif win_pos == 'fullScreen':
             self._orig_tabpage = vim.current.tabpage
             if len(vim.tabpages) < 2:
                 lfCmd("set showtabline=0")
             self._createBufWindow(win_pos)
+            self._setAttributes()
+            self._setStatusline()
         else:
             self._orig_win_nr = vim.current.window.number
             self._orig_win_id = lfWinId(self._orig_win_nr)
             self._createBufWindow(win_pos)
-        self._setAttributes()
-        self._setStatusline()
+            self._setAttributes()
+            self._setStatusline()
 
         self._after_enter()
 
