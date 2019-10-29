@@ -14,6 +14,7 @@ class PopupWindow(object):
     def __init__(self, winid, buffer=None):
         self._winid = winid
         self._buffer = buffer
+        self._cursor = [1, 0]
 
     @property
     def buffer(self):
@@ -22,6 +23,31 @@ class PopupWindow(object):
     @buffer.setter
     def buffer(self, buffer):
         self._buffer = buffer
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @cursor.setter
+    def cursor(self, cursor):
+        self._cursor = cursor
+
+    @property
+    def height(self):
+        return int(lfEval("winheight(%d)" % self._winid))
+
+    @property
+    def width(self):
+        return int(lfEval("winwidth(%d)" % self._winid))
+
+    @property
+    def number(self):
+        return int(lfEval("win_id2win(%d)" % self._winid))
+
+    @property
+    def valid(self):
+        return self.number != 0
+
 
 #*****************************************************
 # LfInstance
@@ -129,7 +155,6 @@ class LfInstance(object):
             lfCmd("augroup END")
 
     def _createPopupWindow(self):
-
         buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
 
         if lfEval("has('nvim')") == '1':
@@ -199,7 +224,7 @@ class LfInstance(object):
             else:
                 maxwidth = min(width, int(lfEval("&columns")))
 
-            maxheight = 40
+            maxheight = 20
             options = {
                     "maxwidth":        maxwidth,
                     "minwidth":        maxwidth,
@@ -222,21 +247,25 @@ class LfInstance(object):
 
             lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(options)))
             self._popup_winid = int(lfEval("winid"))
+            lfCmd("call win_execute(%d, 'set nobuflisted')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set buftype=nofile')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set bufhidden=hide')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set undolevels=-1')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set noswapfile')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set nolist')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set number | set norelativenumber')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set nospell')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set nofoldenable')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set foldmethod=manual')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set shiftwidth=4')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set cursorline')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set foldcolumn=0')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set filetype=leaderf')" % self._popup_winid)
 
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]
-            self._window_object = None
-            lfCmd("call bufload(%d)" % buf_number)
-            print(self._popup_winid, int(lfEval("win_id2win(winid)")), [w.number for w in vim.windows])
-            for w in vim.windows:
-                if w.number == int(lfEval("win_id2win(winid)")):
-                    self._window_object = w
-                    break
-
-            # if line_nr > 0:
-                # lfCmd("""call win_execute(%d, "exec 'norm! %dGzz' | redraw")""" % (self._preview_winid, line_nr))
+            self._window_object = PopupWindow(self._popup_winid, self._buffer_object)
 
     def _createBufWindow(self, win_pos):
         self._win_pos = win_pos
