@@ -14,7 +14,6 @@ class PopupWindow(object):
     def __init__(self, winid, buffer=None):
         self._winid = winid
         self._buffer = buffer
-        self._cursor = [1, 0]
 
     @property
     def buffer(self):
@@ -26,11 +25,14 @@ class PopupWindow(object):
 
     @property
     def cursor(self):
-        return self._cursor
+        # the col of window.cursor starts from 0, while the col of getpos() starts from 1
+        lfCmd("""call win_execute(%d, 'let cursor_pos = getpos(".")') | let cursor_pos[2] -= 1""" % self._winid)
+        return [int(i) for i in lfEval("cursor_pos[1:2]")]
 
     @cursor.setter
     def cursor(self, cursor):
-        self._cursor = cursor
+        cursor = [cursor[0], cursor[1]+1]
+        lfCmd("""call win_execute(%d, 'call cursor(%s)')""" % (self._winid, str(cursor)))
 
     @property
     def height(self):
@@ -259,7 +261,7 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'set undolevels=-1')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set noswapfile')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set nolist')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set number | set norelativenumber')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'set number norelativenumber')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set nospell')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set nofoldenable')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set foldmethod=manual')" % self._popup_winid)
@@ -267,7 +269,6 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'set cursorline')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set foldcolumn=0')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'set filetype=leaderf')" % self._popup_winid)
-
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]

@@ -270,11 +270,17 @@ endfunction
 function! leaderf#Filter(winid, key)
     if a:key == "\<ESC>"
         call popup_hide(a:winid)
-        redraw
         return 0
     elseif a:key == "\<CR>"
         call popup_hide(a:winid)
-        redraw
+        return 0
+    elseif a:key == "\<C-K>"
+        call win_execute(a:winid, "norm! k")
+        return 0
+    elseif a:key == "\<C-J>"
+        call win_execute(a:winid, "norm! j")
+        return 0
+    else
         return 0
     endif
 endfunction

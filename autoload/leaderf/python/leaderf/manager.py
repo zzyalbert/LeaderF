@@ -557,6 +557,10 @@ class Manager(object):
             lfCmd("set autochdir")
 
     def _toUp(self):
+        if self._getInstance().getWinPos() == 'popup':
+            # update statusline
+            return
+
         adjust = False
         if self._getInstance().isReverseOrder() and self._getInstance().getCurrentPos()[0] == 1:
             adjust = True
@@ -576,6 +580,10 @@ class Manager(object):
         lfCmd("setlocal cursorline!")   # also fix a weird bug of vim
 
     def _toDown(self):
+        if self._getInstance().getWinPos() == 'popup':
+            # update statusline
+            return
+
         if not self._getInstance().isReverseOrder() \
                 and self._getInstance().getCurrentPos()[0] == self._getInstance().window.height:
             self._setResultContent()
@@ -1638,7 +1646,10 @@ class Manager(object):
         self._getInstance().setStlCwd(self._getExplorer().getStlCurDir())
 
         if not remember_last_status:
-            lfCmd("normal! gg")
+            if self._getInstance().getWinPos() == 'popup':
+                self._getInstance().window.cursor = (1, 0)
+            else:
+                lfCmd("normal! gg")
 
         self._start_time = time.time()
         self._bang_start_time = self._start_time
