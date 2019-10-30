@@ -46,7 +46,7 @@ class PopupWindow(object):
 
     @property
     def valid(self):
-        return self.number != 0
+        return int(lfEval("winbufnr(%d)" % self._winid)) != -1
 
 
 #*****************************************************
@@ -84,6 +84,7 @@ class LfInstance(object):
         self._cur_buffer_name_ignored = False
         self._ignore_cur_buffer_name = lfEval("get(g:, 'Lf_IgnoreCurrentBufferName', 0)") == '1' \
                                             and self._category in ["File"]
+        self._popup_winid = 0
         self._highlightStl()
 
     def _initStlVar(self):
@@ -155,6 +156,10 @@ class LfInstance(object):
             lfCmd("augroup END")
 
     def _createPopupWindow(self):
+        if self._popup_winid > 0 and self._window_object and self._window_object.valid:
+            lfCmd("call popup_show(%d)" % self._popup_winid)
+            return
+
         buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
 
         if lfEval("has('nvim')") == '1':
@@ -229,6 +234,7 @@ class LfInstance(object):
                     "maxwidth":        maxwidth,
                     "minwidth":        maxwidth,
                     "maxheight":       maxheight,
+                    "zindex":          20480,
                     # "pos":             "botleft",
                     # "line":            "cursor-1",
                     # "col":             col,
@@ -236,7 +242,7 @@ class LfInstance(object):
                     # "border":          [1, 0, 0, 0],
                     # "borderchars":     [' '],
                     # "borderhighlight": ["Lf_hl_previewTitle"],
-                    "filter":          "leaderf#previewFilter",
+                    "filter":          "leaderf#Filter",
                     }
             # if maxheight < int(lfEval("&lines"))//2 - 2:
             #     maxheight = int(lfEval("&lines")) - maxheight - 5
@@ -366,7 +372,7 @@ class LfInstance(object):
 
     def _enterOpeningBuffer(self):
         if (self._tabpage_object and self._tabpage_object.valid
-            and self._window_object and self._window_object.valid
+            and self._window_object and self._window_object.valid and self._window_object.number != 0 # the number may be 0 although PopupWindow is valid.
             and self._window_object.buffer == self._buffer_object):
             vim.current.tabpage = self._tabpage_object
             vim.current.window = self._window_object
@@ -458,7 +464,10 @@ class LfInstance(object):
     def exitBuffer(self):
         self._before_exit()
 
-        if self._win_pos == 'fullScreen':
+        if self._win_pos == 'popup':
+            self._after_exit()
+            return
+        elif self._win_pos == 'fullScreen':
             try:
                 lfCmd("tabclose!")
                 vim.current.tabpage = self._orig_tabpage
@@ -678,7 +687,10 @@ class LfInstance(object):
 
     @property
     def currentLine(self):
-        return vim.current.line if self._buffer_object == vim.current.buffer else None
+        if self._win_pos == 'popup':
+            return self._buffer_object[self._window_object.cursor[0] - 1]
+        else:
+            return vim.current.line if self._buffer_object == vim.current.buffer else None
 
     def empty(self):
         return len(self._buffer_object) == 1 and self._buffer_object[0] == ''
@@ -737,5 +749,11 @@ class LfInstance(object):
         else:
             # 'silent!' is used to skip error E16.
             lfCmd("silent! exec '%d wincmd w'" % self._orig_win_nr)
+
+    def getWinPos(self):
+        return self._win_pos
+
+    def getPopupWinId(self):
+        return self._popup_winid
 
 #  vim: set ts=4 sw=4 tw=0 et :

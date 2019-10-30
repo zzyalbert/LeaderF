@@ -188,6 +188,7 @@ let g:Lf_CommonArguments = [
             \   {"name": ["--belowright"], "nargs": 0, "help": "the LeaderF window is at the belowright of the screen"},
             \   {"name": ["--aboveleft"],  "nargs": 0, "help": "the LeaderF window is at the aboveleft of the screen"},
             \   {"name": ["--fullScreen"], "nargs": 0, "help": "the LeaderF window takes up the full screen"},
+            \   {"name": ["--popup"],      "nargs": 0, "help": "the LeaderF window is a popup window or floating window"},
             \ ],
             \ [
             \   {"name": ["--nameOnly"], "nargs": 0, "help": "LeaderF is in NameOnly mode by default"},

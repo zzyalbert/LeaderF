@@ -267,4 +267,16 @@ function! leaderf#previewFilter(winid, key)
     endif
 endfunction
 
+function! leaderf#Filter(winid, key)
+    if a:key == "\<ESC>"
+        call popup_hide(a:winid)
+        redraw
+        return 0
+    elseif a:key == "\<CR>"
+        call popup_hide(a:winid)
+        redraw
+        return 0
+    endif
+endfunction
+
 autocmd FileType leaderf let b:coc_enabled = 0 | let b:coc_suggest_disable = 1

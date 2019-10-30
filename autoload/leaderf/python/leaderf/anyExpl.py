@@ -687,7 +687,7 @@ class AnyHub(object):
                 lfCmd("call %s('%s')" % (lfEval("g:Lf_PythonExtensions['%s'].registerFunc" % category), category))
                 manager = self._pyext_manages[category]
 
-        positions = {"--top", "--bottom", "--left", "--right", "--belowright", "--aboveleft", "--fullScreen"}
+        positions = {"--top", "--bottom", "--left", "--right", "--belowright", "--aboveleft", "--fullScreen", "--popup"}
         win_pos = "--" + lfEval("g:Lf_WindowPosition")
         for i in arguments:
             if i in positions:
