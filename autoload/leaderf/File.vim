@@ -56,14 +56,18 @@ endfunction
 function! leaderf#File#NormalModeFilter(winid, key)
     let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
 
-    if key == "j"
+    if key == "j" || key ==? "<Down>"
         call win_execute(a:winid, "norm! j")
         redraw
-    elseif key == "k"
+    elseif key == "k" || key ==? "<Up>"
         call win_execute(a:winid, "norm! k")
         redraw
+    elseif key ==? "<PageUp>"
+        call win_execute(a:winid, "norm! \<PageUp>")
+    elseif key ==? "<PageDown>"
+        call win_execute(a:winid, "norm! \<PageDown>")
     elseif key == "q" || key ==? "<ESC>"
-        call popup_hide(a:winid)
+        exec g:Lf_py "fileExplManager.quit()"
     elseif key == "i" || key ==? "<Tab>"
         call leaderf#ResetFilter(a:winid, 'leaderf#PopupFilter')
         exec g:Lf_py "fileExplManager.input()"
@@ -75,6 +79,18 @@ function! leaderf#File#NormalModeFilter(winid, key)
         exec g:Lf_py "fileExplManager.accept('v')"
     elseif key == "t"
         exec g:Lf_py "fileExplManager.accept('t')"
+    elseif key == "s"
+        exec g:Lf_py "fileExplManager.addSelections()"
+    elseif key == "a"
+        exec g:Lf_py "fileExplManager.selectAll()"
+    elseif key == "c"
+        exec g:Lf_py "fileExplManager.clearSelections()"
+    elseif key == "p"
+        exec g:Lf_py "fileExplManager._previewResult(True)"
+    elseif key ==? "<F1>"
+        exec g:Lf_py "fileExplManager.toggleHelp()"
+    elseif key ==? "<F5>"
+        exec g:Lf_py "fileExplManager.refresh()"
     endif
 
     return 1

@@ -444,7 +444,7 @@ class Manager(object):
 
             lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(options)))
             self._preview_winid = int(lfEval("winid"))
-            lfCmd("call win_execute(%d, 'set number')" % self._preview_winid)
+            lfCmd("call win_execute(%d, 'setlocal number norelativenumber')" % self._preview_winid)
             if line_nr > 0:
                 lfCmd("""call win_execute(%d, "exec 'norm! %dGzz' | redraw")""" % (self._preview_winid, line_nr))
 
@@ -465,7 +465,8 @@ class Manager(object):
         elif self._getInstance().window.cursor[0] <= self._help_length:
             return False
 
-        if self._getInstance().empty() or vim.current.buffer != self._getInstance().buffer:
+        if self._getInstance().empty() or (self._getInstance().getWinPos() != 'popup' and
+                vim.current.buffer != self._getInstance().buffer):
             return False
 
         if self._ctrlp_pressed == True:
@@ -540,7 +541,7 @@ class Manager(object):
             self._getInstance().setLineNumber()
         else:
             del self._getInstance().buffer[:self._help_length]
-            if self._getInstance().getWinPos() == 'popup':
+            if self._help_length > 0 and self._getInstance().getWinPos() == 'popup':
                 lfCmd("call win_execute(%d, 'norm! %dk')" % (self._getInstance().getPopupWinId(), self._help_length))
 
         self._help_length = 0
@@ -1288,7 +1289,10 @@ class Manager(object):
 
     def clearSelections(self):
         for i in self._selections.values():
-            lfCmd("call matchdelete(%d)" % i)
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
+            else:
+                lfCmd("call matchdelete(%d)" % i)
         self._selections.clear()
 
     def _cleanup(self):
@@ -1308,6 +1312,8 @@ class Manager(object):
                 del self._getInstance().buffer[-self._help_length:]
         else:
             del self._getInstance().buffer[:self._help_length]
+            if self._help_length > 0 and self._getInstance().getWinPos() == 'popup':
+                lfCmd("call win_execute(%d, 'norm! %dk')" % (self._getInstance().getPopupWinId(), self._help_length))
         self._createHelpHint()
         self.clearSelections()
         self._resetHighlights()
@@ -1557,22 +1563,33 @@ class Manager(object):
 
     def addSelections(self):
         nr = self._getInstance().window.number
-        if (int(lfEval("v:mouse_win")) != 0 and
-                nr != int(lfEval("v:mouse_win"))):
-            return
-        elif nr == int(lfEval("v:mouse_win")):
-            lfCmd("exec v:mouse_lnum")
-            lfCmd("exec 'norm!'.v:mouse_col.'|'")
+
+        if self._getInstance().getWinPos() != 'popup':
+            if (int(lfEval("v:mouse_win")) != 0 and
+                    nr != int(lfEval("v:mouse_win"))):
+                return
+            elif nr == int(lfEval("v:mouse_win")):
+                lfCmd("exec v:mouse_lnum")
+                lfCmd("exec 'norm!'.v:mouse_col.'|'")
+
         line_nr = self._getInstance().window.cursor[0]
         if line_nr <= self._help_length:
             lfCmd("norm! j")
             return
 
         if line_nr in self._selections:
-            lfCmd("call matchdelete(%d)" % self._selections[line_nr])
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("call matchdelete(%d, %d)" % (self._selections[line_nr], self._getInstance().getPopupWinId()))
+            else:
+                lfCmd("call matchdelete(%d)" % self._selections[line_nr])
             del self._selections[line_nr]
         else:
-            id = int(lfEval("matchadd('Lf_hl_selection', '\%%%dl.')" % line_nr))
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_selection', '\\\\%%%dl.')")"""
+                        % (self._getInstance().getPopupWinId(), line_nr))
+                id = int(lfEval("matchid"))
+            else:
+                id = int(lfEval("matchadd('Lf_hl_selection', '\%%%dl.')" % line_nr))
             self._selections[line_nr] = id
 
     def selectMulti(self):

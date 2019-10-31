@@ -163,12 +163,13 @@ class LfInstance(object):
             lfCmd("augroup END")
 
     def _createPopupWindow(self):
-        if self._window_object and self._window_object.tabpage == vim.current.tabpage:
-            if self._popup_winid > 0 and self._window_object.valid:
-                lfCmd("call popup_show(%d)" % self._popup_winid)
-                return
-        else:
-            lfCmd("call popup_close(%d)" % self._popup_winid)
+        if type(self._window_object) != type(vim.current.window): # type is PopupWindow
+            if self._window_object and self._window_object.tabpage == vim.current.tabpage:
+                if self._popup_winid > 0 and self._window_object.valid:
+                    lfCmd("call popup_show(%d)" % self._popup_winid)
+                    return
+            else:
+                lfCmd("call popup_close(%d)" % self._popup_winid)
 
         buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
 
@@ -263,20 +264,20 @@ class LfInstance(object):
 
             lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(options)))
             self._popup_winid = int(lfEval("winid"))
-            lfCmd("call win_execute(%d, 'set nobuflisted')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set buftype=nofile')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set bufhidden=hide')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set undolevels=-1')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set noswapfile')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set nolist')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set number norelativenumber')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set nospell')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set nofoldenable')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set foldmethod=manual')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set shiftwidth=4')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set cursorline')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set foldcolumn=0')" % self._popup_winid)
-            lfCmd("call win_execute(%d, 'set filetype=leaderf')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal nobuflisted')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal buftype=nofile')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal bufhidden=hide')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal undolevels=-1')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal noswapfile')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal nolist')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal number norelativenumber')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal nospell')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal nofoldenable')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal foldmethod=manual')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal cursorline')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % self._popup_winid)
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]
@@ -381,7 +382,7 @@ class LfInstance(object):
 
     def _enterOpeningBuffer(self):
         if (self._tabpage_object and self._tabpage_object.valid
-            and self._window_object and self._window_object.valid and self._window_object.number != 0 # the number may be 0 although PopupWindow is valid.
+            and self._window_object and self._window_object.valid and self._window_object.number != 0 # the number may be 0 although PopupWindow is valid because of popup_hide()
             and self._window_object.buffer == self._buffer_object):
             vim.current.tabpage = self._tabpage_object
             vim.current.window = self._window_object
