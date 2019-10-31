@@ -11,9 +11,10 @@ from .utils import *
 
 
 class PopupWindow(object):
-    def __init__(self, winid, buffer=None):
+    def __init__(self, winid, buffer, tabpage):
         self._winid = winid
         self._buffer = buffer
+        self._tabpage = tabpage
 
     @property
     def buffer(self):
@@ -22,6 +23,10 @@ class PopupWindow(object):
     @buffer.setter
     def buffer(self, buffer):
         self._buffer = buffer
+
+    @property
+    def tabpage(self):
+        return self._tabpage
 
     @property
     def cursor(self):
@@ -158,9 +163,12 @@ class LfInstance(object):
             lfCmd("augroup END")
 
     def _createPopupWindow(self):
-        if self._popup_winid > 0 and self._window_object and self._window_object.valid:
-            lfCmd("call popup_show(%d)" % self._popup_winid)
-            return
+        if self._window_object and self._window_object.tabpage == vim.current.tabpage:
+            if self._popup_winid > 0 and self._window_object.valid:
+                lfCmd("call popup_show(%d)" % self._popup_winid)
+                return
+        else:
+            lfCmd("call popup_close(%d)" % self._popup_winid)
 
         buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
 
@@ -244,7 +252,7 @@ class LfInstance(object):
                     # "border":          [1, 0, 0, 0],
                     # "borderchars":     [' '],
                     # "borderhighlight": ["Lf_hl_previewTitle"],
-                    "filter":          "leaderf#Filter",
+                    "filter":          "leaderf#PopupFilter",
                     }
             # if maxheight < int(lfEval("&lines"))//2 - 2:
             #     maxheight = int(lfEval("&lines")) - maxheight - 5
@@ -272,7 +280,7 @@ class LfInstance(object):
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]
-            self._window_object = PopupWindow(self._popup_winid, self._buffer_object)
+            self._window_object = PopupWindow(self._popup_winid, self._buffer_object, self._tabpage_object)
 
     def _createBufWindow(self, win_pos):
         self._win_pos = win_pos
@@ -466,6 +474,7 @@ class LfInstance(object):
         self._before_exit()
 
         if self._win_pos == 'popup':
+            lfCmd("call popup_hide(%d)" % self._popup_winid)
             self._after_exit()
             return
         elif self._win_pos == 'fullScreen':

@@ -46,7 +46,7 @@ class LfCli(object):
         self._start_time = datetime.now()
         self._idle = False
         self._blinkon = True
-        self._cmd_map = lfEval("g:Lf_CommandMap")
+        self._key_dict = lfEval("g:Lf_KeyDict")
         self._refine = False
         self._delimiter = lfEval("g:Lf_DelimiterChar")
         self._and_delimiter = lfEval("get(g:, 'Lf_AndDelimiter', ' ')")
@@ -500,12 +500,9 @@ class LfCli(object):
                     yield '<Update>'
                 else:
                     cmd = ''
-                    for (key, value) in self._cmd_map.items():
-                        for i in value:
-                            if lfEval('ch ==# "\%s"' % i) == '1':
-                                cmd = key
-                                break
-                        if cmd != '':
+                    for (key, value) in self._key_dict.items():
+                        if lfEval('ch ==# "\%s"' % key) == '1':
+                            cmd = value
                             break
                     if equal(cmd, '<CR>'):
                         yield '<CR>'

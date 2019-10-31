@@ -52,3 +52,30 @@ endfunction
 function! leaderf#File#TimerCallback(id)
     call leaderf#LfPy("fileExplManager._workInIdle(bang=True)")
 endfunction
+
+function! leaderf#File#NormalModeFilter(winid, key)
+    let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
+
+    if key == "j"
+        call win_execute(a:winid, "norm! j")
+        redraw
+    elseif key == "k"
+        call win_execute(a:winid, "norm! k")
+        redraw
+    elseif key == "q" || key ==? "<ESC>"
+        call popup_hide(a:winid)
+    elseif key == "i" || key ==? "<Tab>"
+        call leaderf#ResetFilter(a:winid, 'leaderf#PopupFilter')
+        exec g:Lf_py "fileExplManager.input()"
+    elseif key == "o" || key ==? "<CR>" || key ==? "<2-LeftMouse>"
+        exec g:Lf_py "fileExplManager.accept()"
+    elseif key == "x"
+        exec g:Lf_py "fileExplManager.accept('h')"
+    elseif key == "v"
+        exec g:Lf_py "fileExplManager.accept('v')"
+    elseif key == "t"
+        exec g:Lf_py "fileExplManager.accept('t')"
+    endif
+
+    return 1
+endfunction

@@ -609,7 +609,8 @@ class FileExplManager(Manager):
         return FileExplorer
 
     def _defineMaps(self):
-        lfCmd("call leaderf#File#Maps()")
+        if self._getInstance().getWinPos() != 'popup':
+            lfCmd("call leaderf#File#Maps()")
         lfCmd("augroup Lf_File")
         lfCmd("autocmd!")
         lfCmd("autocmd VimLeavePre * call leaderf#File#cleanup()")

@@ -254,6 +254,10 @@ class Manager(object):
         pass
 
     def _bangEnter(self):
+        if self._getInstance().getWinPos() == 'popup':
+            lfCmd("call leaderf#ResetFilter(%d, '%s')" % (self._getInstance().getPopupWinId(),
+                    'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
+
         self._resetHighlights()
         if self._cli.pattern and self._index == 0:
             self._search(self._content)
@@ -536,6 +540,9 @@ class Manager(object):
             self._getInstance().setLineNumber()
         else:
             del self._getInstance().buffer[:self._help_length]
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("call win_execute(%d, 'norm! %dk')" % (self._getInstance().getPopupWinId(), self._help_length))
+
         self._help_length = 0
 
     def _getExplorer(self):
@@ -594,6 +601,10 @@ class Manager(object):
         lfCmd("setlocal cursorline!")   # also fix a weird bug of vim
 
     def _pageUp(self):
+        if self._getInstance().getWinPos() == 'popup':
+            # update statusline
+            return
+
         if self._getInstance().isReverseOrder():
             self._setResultContent()
             if self._cli.pattern and self._cli.isFuzzy \
@@ -606,6 +617,10 @@ class Manager(object):
         self._getInstance().setLineNumber()
 
     def _pageDown(self):
+        if self._getInstance().getWinPos() == 'popup':
+            # update statusline
+            return
+
         if not self._getInstance().isReverseOrder():
             self._setResultContent()
 
@@ -1585,6 +1600,12 @@ class Manager(object):
                 id = int(lfEval("matchadd('Lf_hl_selection', '\%%%dl.')" % (i+1)))
                 self._selections[i+1] = id
 
+    def _gotoFirstLine(self):
+        if self._getInstance().getWinPos() == 'popup':
+            self._getInstance().window.cursor = (1, 0)
+        else:
+            lfCmd("normal! gg")
+
     def startExplorer(self, win_pos, *args, **kwargs):
         arguments_dict = kwargs.get("arguments", {})
         self.setArguments(arguments_dict)
@@ -1646,10 +1667,7 @@ class Manager(object):
         self._getInstance().setStlCwd(self._getExplorer().getStlCurDir())
 
         if not remember_last_status:
-            if self._getInstance().getWinPos() == 'popup':
-                self._getInstance().window.cursor = (1, 0)
-            else:
-                lfCmd("normal! gg")
+            self._gotoFirstLine()
 
         self._start_time = time.time()
         self._bang_start_time = self._start_time
@@ -1690,7 +1708,7 @@ class Manager(object):
                 self._bangEnter()
 
                 if not self._cli.pattern and empty_query:
-                    lfCmd("normal! gg")
+                    self._gotoFirstLine()
                     self._guessSearch(self._content)
                     if self._result_content: # self._result_content is [] only if 
                                              #  self._cur_buffer.name == '' or self._cur_buffer.options["buftype"] not in [b'', '']:
@@ -1914,6 +1932,9 @@ class Manager(object):
 
     @modifiableController
     def input(self):
+        if self._getInstance().getWinPos() == 'popup':
+            lfCmd("call leaderf#ResetFilter(%d, '%s')" % (self._getInstance().getPopupWinId(), 'leaderf#PopupFilter'))
+
         if self._timer_id is not None:
             lfCmd("call timer_stop(%s)" % self._timer_id)
             self._timer_id = None
@@ -1931,12 +1952,14 @@ class Manager(object):
             cur_len = len(self._content)
             cur_content = self._content[:cur_len]
             if equal(cmd, '<Update>'):
+                if self._getInstance().getWinPos() == 'popup':
+                    self._getInstance().window.cursor = (1, 0)
                 self._search(cur_content)
             elif equal(cmd, '<Shorten>'):
                 if self._getInstance().isReverseOrder():
                     lfCmd("normal! G")
                 else:
-                    lfCmd("normal! gg")
+                    self._gotoFirstLine()
                 self._index = 0 # search from beginning
                 self._search(cur_content)
             elif equal(cmd, '<Mode>'):
@@ -1944,7 +1967,7 @@ class Manager(object):
                 if self._getInstance().isReverseOrder():
                     lfCmd("normal! G")
                 else:
-                    lfCmd("normal! gg")
+                    self._gotoFirstLine()
                 self._index = 0 # search from beginning
                 if self._cli.pattern:
                     self._search(cur_content)
@@ -1959,7 +1982,7 @@ class Manager(object):
                     if self._getInstance().isReverseOrder():
                         lfCmd("normal! G")
                     else:
-                        lfCmd("normal! gg")
+                        self._gotoFirstLine()
                     self._index = 0 # search from beginning
                     self._search(cur_content)
             elif equal(cmd, '<Down>'):
@@ -1967,7 +1990,7 @@ class Manager(object):
                     if self._getInstance().isReverseOrder():
                         lfCmd("normal! G")
                     else:
-                        lfCmd("normal! gg")
+                        self._gotoFirstLine()
                     self._index = 0 # search from beginning
                     self._search(cur_content)
             elif equal(cmd, '<LeftMouse>'):
@@ -1995,6 +2018,9 @@ class Manager(object):
                 self.quit()
                 break
             elif equal(cmd, '<Tab>'):   # switch to Normal mode
+                if self._getInstance().getWinPos() == 'popup':
+                    lfCmd("call leaderf#ResetFilter(%d, '%s')" % (self._getInstance().getPopupWinId(),
+                            'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
                 self._setResultContent()
                 self.clearSelections()
                 self._cli.hideCursor()

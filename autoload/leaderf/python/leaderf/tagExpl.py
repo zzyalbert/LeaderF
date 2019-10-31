@@ -88,7 +88,7 @@ class TagExplManager(Manager):
         if tagaddress[0] not in '/?':
             lfCmd(tagaddress)
         else:
-            lfCmd("norm! gg")
+            self._gotoFirstLine()
 
             # In case there are mutiple matches.
             if len(res) > 1:
