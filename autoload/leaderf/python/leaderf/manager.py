@@ -1385,6 +1385,7 @@ class Manager(object):
 
             orig_cwd = os.getcwd()
             if mode == '':
+                self._accept(files[0], mode)
                 self._argaddFiles(files)
                 self._accept(files[0], mode)
             else:
@@ -1614,7 +1615,12 @@ class Manager(object):
             return
         for i in range(line_num):
             if i >= self._help_length and i+1 not in self._selections:
-                id = int(lfEval("matchadd('Lf_hl_selection', '\%%%dl.')" % (i+1)))
+                if self._getInstance().getWinPos() == 'popup':
+                    lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_selection', '\\\\%%%dl.')")"""
+                            % (self._getInstance().getPopupWinId(), i+1))
+                    id = int(lfEval("matchid"))
+                else:
+                    id = int(lfEval("matchadd('Lf_hl_selection', '\%%%dl.')" % (i+1)))
                 self._selections[i+1] = id
 
     def _gotoFirstLine(self):

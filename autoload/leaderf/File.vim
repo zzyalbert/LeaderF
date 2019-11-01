@@ -53,7 +53,7 @@ function! leaderf#File#TimerCallback(id)
     call leaderf#LfPy("fileExplManager._workInIdle(bang=True)")
 endfunction
 
-function! leaderf#File#NormalModeFilter(winid, key)
+function! leaderf#File#NormalModeFilter(winid, key) abort
     let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
 
     if key == "j" || key ==? "<Down>"

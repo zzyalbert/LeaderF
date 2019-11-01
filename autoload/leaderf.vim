@@ -310,12 +310,12 @@ function! leaderf#versionCheck()
     return 1
 endfunction
 
-function! leaderf#LfPy(cmd)
+function! leaderf#LfPy(cmd) abort
     exec g:Lf_py . a:cmd
 endfunction
 
 " return the visually selected text and quote it with double quote
-function! leaderf#visual()
+function! leaderf#visual() abort
     try
         let x_save = @x
         norm! gv"xy
@@ -325,7 +325,7 @@ function! leaderf#visual()
     endtry
 endfunction
 
-function! leaderf#previewFilter(winid, key)
+function! leaderf#previewFilter(winid, key) abort
     if a:key == "\<ESC>"
         call popup_close(a:winid)
         redraw
@@ -337,7 +337,7 @@ function! leaderf#previewFilter(winid, key)
     endif
 endfunction
 
-function! leaderf#PopupFilter(winid, key)
+function! leaderf#PopupFilter(winid, key) abort
     let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, ""), "")
     if key ==? "<ESC>" || key ==? "<C-C>"
         call popup_hide(a:winid)
@@ -356,7 +356,7 @@ function! leaderf#PopupFilter(winid, key)
     return 0
 endfunction
 
-function! leaderf#ResetFilter(winid, filter)
+function! leaderf#ResetFilter(winid, filter) abort
     let opts = popup_getoptions(a:winid)
     " https://github.com/vim/vim/issues/5081
     unlet opts.mousemoved
