@@ -91,6 +91,10 @@ function! leaderf#File#NormalModeFilter(winid, key) abort
         exec g:Lf_py "fileExplManager.toggleHelp()"
     elseif key ==? "<F5>"
         exec g:Lf_py "fileExplManager.refresh()"
+    elseif key ==? "<LeftMouse>"
+        call win_execute(a:winid, "exec v:mouse_popup_row")
+        call win_execute(a:winid, "exec 'norm!'.v:mouse_popup_col.'|'")
+        redraw
     endif
 
     return 1
