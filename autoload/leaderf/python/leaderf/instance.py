@@ -156,6 +156,7 @@ class LfInstance(object):
                                             and self._category in ["File"]
         self._popup_winid = 0
         self._popup_instance = LfPopupInstance()
+        self._win_pos = None
         self._highlightStl()
 
     def _initStlVar(self):
@@ -349,6 +350,7 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal cursorline')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_popup_window')" % self._popup_winid)
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]

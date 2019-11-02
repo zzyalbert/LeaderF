@@ -365,4 +365,12 @@ function! leaderf#ResetFilter(winid, filter) abort
     call popup_setoptions(a:winid, opts)
 endfunction
 
+" `pos` - A list with three numbers, e.g., [23, 11, 3]. As above, but
+" the third number gives the length of the highlight in bytes.
+function! leaderf#matchaddpos(group, pos) abort
+    for pos in a:pos
+        call prop_add(pos[0], pos[1], {'length': pos[2], 'type': a:group})
+    endfor
+endfunction
+
 autocmd FileType leaderf let b:coc_enabled = 0 | let b:coc_suggest_disable = 1

@@ -1090,11 +1090,26 @@ class Manager(object):
             highlight_method(hl_group='Lf_hl_match' + str(i % 5))
 
     def _clearHighlights(self):
+        if self._getInstance().getWinPos() == 'popup':
+            highlight_number = int(lfEval("g:Lf_NumberOfHighlight"))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_match', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_match0', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_match1', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_match2', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_match3', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_match4', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_matchRefine', 'all': 1}, 1, %d)")"""
+                    % (self._getInstance().getPopupWinId(), highlight_number))
+            return
+
         for i in self._highlight_ids:
-            if self._getInstance().getWinPos() == 'popup':
-                lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
-            else:
-                lfCmd("silent! call matchdelete(%d)" % i)
+            lfCmd("silent! call matchdelete(%d)" % i)
         self._highlight_ids = []
 
     def _clearHighlightsPos(self):
@@ -1122,11 +1137,10 @@ class Manager(object):
                 # The maximum number of positions is 8 in matchaddpos().
                 for j in range(0, len(pos), 8):
                     if self._getInstance().getWinPos() == 'popup':
-                        lfCmd("""call win_execute(%d, "let matchid = matchaddpos('%s', %s)")""" % (self._getInstance().getPopupWinId(), hl_group, str(pos[j:j+8])))
-                        id = int(lfEval("matchid"))
+                        lfCmd("""call win_execute(%d, "call leaderf#matchaddpos('%s', %s)")""" % (self._getInstance().getPopupWinId(), hl_group, str(pos[j:j+8])))
                     else:
                         id = int(lfEval("matchaddpos('%s', %s)" % (hl_group, str(pos[j:j+8]))))
-                    self._highlight_ids.append(id)
+                        self._highlight_ids.append(id)
 
         for i, pos in enumerate(self._highlight_refine_pos):
             if self._getInstance().isReverseOrder():
@@ -1136,11 +1150,10 @@ class Manager(object):
             # The maximum number of positions is 8 in matchaddpos().
             for j in range(0, len(pos), 8):
                 if self._getInstance().getWinPos() == 'popup':
-                    lfCmd("""call win_execute(%d, "let matchid = matchaddpos('Lf_hl_matchRefine', %s)")""" % (self._getInstance().getPopupWinId(), str(pos[j:j+8])))
-                    id = int(lfEval("matchid"))
+                    lfCmd("""call win_execute(%d, "call leaderf#matchaddpos('Lf_hl_matchRefine', %s)")""" % (self._getInstance().getPopupWinId(), str(pos[j:j+8])))
                 else:
                     id = int(lfEval("matchaddpos('Lf_hl_matchRefine', %s)" % str(pos[j:j+8])))
-                self._highlight_ids.append(id)
+                    self._highlight_ids.append(id)
 
     def _highlight(self, is_full_path, get_highlights, use_fuzzy_engine=False, clear=True, hl_group='Lf_hl_match'):
         # matchaddpos() is introduced by Patch 7.4.330
@@ -1191,11 +1204,10 @@ class Manager(object):
             # The maximum number of positions is 8 in matchaddpos().
             for j in range(0, len(pos), 8):
                 if self._getInstance().getWinPos() == 'popup':
-                    lfCmd("""call win_execute(%d, "let matchid = matchaddpos('%s', %s)")""" % (self._getInstance().getPopupWinId(), hl_group, str(pos[j:j+8])))
-                    id = int(lfEval("matchid"))
+                    lfCmd("""call win_execute(%d, "call leaderf#matchaddpos('%s', %s)")""" % (self._getInstance().getPopupWinId(), hl_group, str(pos[j:j+8])))
                 else:
                     id = int(lfEval("matchaddpos('%s', %s)" % (hl_group, str(pos[j:j+8]))))
-                self._highlight_ids.append(id)
+                    self._highlight_ids.append(id)
 
     def _highlightRefine(self, first_get_highlights, get_highlights):
         # matchaddpos() is introduced by Patch 7.4.330
@@ -1236,11 +1248,10 @@ class Manager(object):
             # The maximum number of positions is 8 in matchaddpos().
             for j in range(0, len(pos), 8):
                 if self._getInstance().getWinPos() == 'popup':
-                    lfCmd("""call win_execute(%d, "let matchid = matchaddpos('Lf_hl_match', %s)")""" % (self._getInstance().getPopupWinId(), str(pos[j:j+8])))
-                    id = int(lfEval("matchid"))
+                    lfCmd("""call win_execute(%d, "call leaderf#matchaddpos('Lf_hl_match', %s)")""" % (self._getInstance().getPopupWinId(), str(pos[j:j+8])))
                 else:
                     id = int(lfEval("matchaddpos('Lf_hl_match', %s)" % str(pos[j:j+8])))
-                self._highlight_ids.append(id)
+                    self._highlight_ids.append(id)
 
         self._highlight_refine_pos = [get_highlights(getDigest(line, 2))
                                       for line in content[:highlight_number:unit]]
@@ -1256,11 +1267,10 @@ class Manager(object):
             # The maximum number of positions is 8 in matchaddpos().
             for j in range(0, len(pos), 8):
                 if self._getInstance().getWinPos() == 'popup':
-                    lfCmd("""call win_execute(%d, "let matchid = matchaddpos('Lf_hl_matchRefine', %s)")""" % (self._getInstance().getPopupWinId(), str(pos[j:j+8])))
-                    id = int(lfEval("matchid"))
+                    lfCmd("""call win_execute(%d, "call leaderf#matchaddpos('Lf_hl_matchRefine', %s)")""" % (self._getInstance().getPopupWinId(), str(pos[j:j+8])))
                 else:
                     id = int(lfEval("matchaddpos('Lf_hl_matchRefine', %s)" % str(pos[j:j+8])))
-                self._highlight_ids.append(id)
+                    self._highlight_ids.append(id)
 
     def _regexFilter(self, iterable):
         def noErrMatch(text, pattern):
