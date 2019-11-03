@@ -338,21 +338,6 @@ function! leaderf#previewFilter(winid, key) abort
 endfunction
 
 function! leaderf#PopupFilter(winid, key) abort
-    let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, ""), "")
-    if key ==? "<ESC>" || key ==? "<C-C>"
-        call popup_hide(a:winid)
-    elseif key ==? "<CR>" || key ==? "<C-X>" || key ==? "<C-]>" || key ==? "<C-T>"
-        call popup_hide(a:winid)
-    elseif key ==? "<C-K>"
-        call win_execute(a:winid, "norm! k")
-    elseif key ==? "<C-J>"
-        call win_execute(a:winid, "norm! j")
-    elseif key ==? "<PageUp>"
-        call win_execute(a:winid, "norm! \<PageUp>")
-    elseif key ==? "<PageDown>"
-        call win_execute(a:winid, "norm! \<PageDown>")
-    endif
-
     return 0
 endfunction
 
