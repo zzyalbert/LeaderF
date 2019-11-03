@@ -341,6 +341,17 @@ function! leaderf#PopupFilter(winid, key) abort
     return 0
 endfunction
 
+function! leaderf#PopupClosed(id_list, winid, result) abort
+    " result is -1 if CTRL-C was pressed,
+    if a:result == -1
+        for id in a:id_list
+            if id != a:winid
+                call popup_close(id)
+            endif
+        endfor
+    endif
+endfunction
+
 function! leaderf#ResetFilter(winid, filter) abort
     let opts = popup_getoptions(a:winid)
     " https://github.com/vim/vim/issues/5081
@@ -350,6 +361,14 @@ function! leaderf#ResetFilter(winid, filter) abort
     call popup_setoptions(a:winid, opts)
 endfunction
 
+function! leaderf#ResetCallback(winid, callback) abort
+    let opts = popup_getoptions(a:winid)
+    " https://github.com/vim/vim/issues/5081
+    unlet opts.mousemoved
+    unlet opts.moved
+    let opts.callback = a:callback
+    call popup_setoptions(a:winid, opts)
+endfunction
 " `pos` - A list with three numbers, e.g., [23, 11, 3]. As above, but
 " the third number gives the length of the highlight in bytes.
 function! leaderf#matchaddpos(group, pos) abort

@@ -17,6 +17,10 @@ class PopupWindow(object):
         self._tabpage = tabpage
 
     @property
+    def id(self):
+        return self._winid
+
+    @property
     def buffer(self):
         return self._buffer
 
@@ -67,57 +71,53 @@ class PopupWindow(object):
 
 class LfPopupInstance(object):
     def __init__(self):
-        self._content_win = None
-        self._input_win = None
-        self._statusline_win = None
+        self._popup_wins = {
+                "content_win": None,
+                "input_win": None,
+                "statusline_win": None,
+                }
 
     def close(self):
-        if self._content_win:
-            self._content_win.close()
-        if self._input_win:
-            self._input_win.close()
-        if self._statusline_win:
-            self._statusline_win.close()
+        for win in self._popup_wins.values():
+            if win:
+                win.close()
 
     def show(self):
-        if self._content_win:
-            self._content_win.show()
-        if self._input_win:
-            self._input_win.show()
-        if self._statusline_win:
-            self._statusline_win.show()
+        for win in self._popup_wins.values():
+            if win:
+                win.show()
 
     def hide(self):
-        if self._content_win:
-            self._content_win.hide()
-        if self._input_win:
-            self._input_win.hide()
-        if self._statusline_win:
-            self._statusline_win.hide()
+        for win in self._popup_wins.values():
+            if win:
+                win.hide()
 
     @property
     def content_win(self):
-        return self._content_win
+        return self._popup_wins["content_win"]
 
     @content_win.setter
     def content_win(self, content_win):
-        self._content_win = content_win
+        self._popup_wins["content_win"] = content_win
 
     @property
     def input_win(self):
-        return self._input_win
+        return self._popup_wins["input_win"]
 
     @input_win.setter
     def input_win(self, input_win):
-        self._input_win = input_win
+        self._popup_wins["input_win"] = input_win
 
     @property
     def statusline_win(self):
-        return self._statusline_win
+        return self._popup_wins["statusline_win"]
 
     @statusline_win.setter
     def statusline_win(self, statusline_win):
-        self._statusline_win = statusline_win
+        self._popup_wins["statusline_win"] = statusline_win
+
+    def getWinIdList(self):
+        return [win.id for win in self._popup_wins.values() if win is not None]
 
 #*****************************************************
 # LfInstance
@@ -371,7 +371,7 @@ class LfInstance(object):
                     # "border":          [0, 1, 0, 0],
                     # "borderchars":     [' '],
                     # "borderhighlight": ["Lf_hl_previewTitle"],
-                    "filter":          "leaderf#PopupFilter",
+                    # "filter":          "leaderf#PopupFilter",
                     }
 
             buf_number = int(lfEval("bufadd('')"))
@@ -394,6 +394,9 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
             self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
+
+            lfCmd("""call leaderf#ResetCallback(%d, function('leaderf#PopupClosed', [%s]))"""
+                    % (self._popup_winid, str(self._popup_instance.getWinIdList())))
 
     def _createBufWindow(self, win_pos):
         self._win_pos = win_pos
