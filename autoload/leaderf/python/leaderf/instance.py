@@ -388,9 +388,9 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal nofoldenable')" % winid)
             lfCmd("call win_execute(%d, 'setlocal foldmethod=manual')" % winid)
             lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % winid)
-            lfCmd("call win_execute(%d, 'setlocal cursorline')" % winid)
+            lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
             lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
-            lfCmd("call win_execute(%d, 'setlocal wincolor=QuickFixLine')" % winid)
+            lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
             self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
@@ -881,5 +881,8 @@ class LfInstance(object):
 
     def getPopupWinId(self):
         return self._popup_winid
+
+    def getPopupInstance(self):
+        return self._popup_instance
 
 #  vim: set ts=4 sw=4 tw=0 et :

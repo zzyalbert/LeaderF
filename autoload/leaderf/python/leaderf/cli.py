@@ -39,7 +39,8 @@ def cursorController(func):
 # LfCli
 #*****************************************************
 class LfCli(object):
-    def __init__(self):
+    def __init__(self, manager):
+        self._manager = manager
         self._cmdline = []
         self._pattern = ''
         self._cursor_pos = 0
@@ -154,6 +155,20 @@ class LfCli(object):
         else:
             lfCmd("hi! default link Lf_hl_cursor NONE")
 
+    def _buildPopupPrompt(self):
+        if self._is_fuzzy:
+            if self._is_full_path:
+                prompt = '>F> '
+            else:
+                prompt = '>>> '
+        else:
+            prompt = 'R>> '
+
+        pattern = ''.join(self._cmdline)
+        input_winid = self._manager._getInstance().getPopupInstance().input_win.id
+        lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(prompt+pattern)))
+        lfCmd("redraw")
+
     def _buildPrompt(self):
         if lfEval("has('nvim')") == '1':
             self._buildNvimPrompt()
@@ -175,6 +190,10 @@ class LfCli(object):
                 self._blinkon = not self._blinkon
             elif self._idle:
                 return
+
+        if self._manager._getInstance().getWinPos() == 'popup':
+            self._buildPopupPrompt()
+            return
 
         if self._is_fuzzy:
             if self._is_full_path:

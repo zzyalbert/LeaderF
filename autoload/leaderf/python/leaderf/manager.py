@@ -84,7 +84,7 @@ class Manager(object):
     def __init__(self):
         self._autochdir = 0
         self._instance = None
-        self._cli = LfCli()
+        self._cli = LfCli(self)
         self._explorer = None
         self._content = []
         self._index = 0
