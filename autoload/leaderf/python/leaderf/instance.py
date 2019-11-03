@@ -217,7 +217,8 @@ class LfInstance(object):
     def _setStatusline(self):
         self._initStlVar()
         self.window.options["statusline"] = self._stl
-        lfCmd("redrawstatus")
+        if self._win_pos != 'popup':
+            lfCmd("redrawstatus")
         if not self._is_autocmd_set:
             self._is_autocmd_set = True
             lfCmd("augroup Lf_{}_Colorscheme".format(self._category))
@@ -785,12 +786,14 @@ class LfInstance(object):
                         self.setStlRunning(True)
                     self.setStlTotal(len(cur_content)//unit)
                     self.setStlResultsCount(len(cur_content)//unit)
-                    lfCmd("redrawstatus")
+                    if self._win_pos != 'popup':
+                        lfCmd("redrawstatus")
             self.setBuffer(cur_content, need_copy=True)
             self.setStlTotal(len(self._buffer_object)//unit)
             self.setStlRunning(False)
             self.setStlResultsCount(len(self._buffer_object)//unit, True)
-            lfCmd("redrawstatus")
+            if self._win_pos != 'popup':
+                lfCmd("redrawstatus")
             set_content(cur_content)
         except vim.error: # neovim <C-C>
             pass

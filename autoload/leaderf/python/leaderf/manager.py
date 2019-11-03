@@ -1911,7 +1911,8 @@ class Manager(object):
 
                 self._getInstance().setStlTotal(len(self._content)//self._getUnit())
                 self._getInstance().setStlRunning(False)
-                lfCmd("redrawstatus")
+                if self._getInstance().getWinPos() != 'popup':
+                    lfCmd("redrawstatus")
 
             if self._cli.pattern:
                 if self._index < len(self._content) or len(self._cb_content) > 0:
@@ -1939,7 +1940,8 @@ class Manager(object):
                 else:
                     self._getInstance().setStlResultsCount(cur_len)
 
-                lfCmd("redrawstatus")
+                if self._getInstance().getWinPos() != 'popup':
+                    lfCmd("redrawstatus")
 
             if self._cli.pattern:
                 if self._index < cur_len or len(self._cb_content) > 0:
