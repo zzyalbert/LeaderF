@@ -5,6 +5,7 @@ import vim
 import re
 import time
 from datetime import datetime
+from datetime import timedelta
 from functools import wraps
 from collections import OrderedDict
 from .utils import *
@@ -174,10 +175,7 @@ class LfCli(object):
             self._buildNvimPrompt()
             return
 
-        delta_time = datetime.now() - self._start_time
-        delta_ms = delta_time.microseconds + (delta_time.seconds +
-                   delta_time.days * 24 * 3600) * 10**6
-        if self._idle and delta_ms < 500000: # 500ms
+        if self._idle and datetime.now() - self._start_time < timedelta(milliseconds=500): # 500ms
             return
         else:
             if self._blinkon:
