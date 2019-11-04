@@ -55,6 +55,7 @@ class LfCli(object):
         self._supports_nameonly = False
         self._supports_refine = False
         self._is_and_mode = False
+        self._running_status = 0
         self._setDefaultMode()
 
     def setInstance(self, instance):
@@ -180,10 +181,18 @@ class LfCli(object):
         part1 = prompt + pattern
         part2 = "{}/{}".format(line_num, result_count)
         part3 = total
-        text = "{:<{part1_width}} {:>{part2_width}} {:>{part3_width}} ".format(part1,
+        flag = ('+', '×')
+        if lfEval("g:Lf_{}_StlRunning".format(self._instance._category)) == '1':
+            status = " {} ".format(flag[self._running_status])
+            self._running_status = (self._running_status + 1) & 1
+        else:
+            status = " "
+            self._running_status = 0
+        text = "{:<{part1_width}} {:>{part2_width}}{}{:>{part3_width}} ".format(part1,
                                                                                part2,
+                                                                               status,
                                                                                part3,
-                                                                               part1_width=input_win_width-3-len(part2)-len(part3),
+                                                                               part1_width=input_win_width-2-len(status)-len(part2)-len(part3),
                                                                                part2_width=len(part2),
                                                                                part3_width=len(part3))
         lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(text)))

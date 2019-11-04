@@ -588,6 +588,13 @@ class LfInstance(object):
             self._cli._buildPopupPrompt()
 
     def setStlRunning(self, running):
+        if self._win_pos == 'popup':
+            if running:
+                lfCmd("let g:Lf_{}_StlRunning = 1".format(self._category))
+            else:
+                lfCmd("let g:Lf_{}_StlRunning = 0".format(self._category))
+            return
+
         if running:
             status = (':', ' ')
             lfCmd("let g:Lf_{}_StlRunning = '{}'".format(self._category, status[self._running_status]))
