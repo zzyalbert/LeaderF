@@ -171,14 +171,21 @@ class LfCli(object):
         pattern = ''.join(self._cmdline)
         input_winid = self._instance.getPopupInstance().input_win.id
         content_winid = self._instance.getPopupInstance().content_win.id
-        lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
-        lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
-
         input_win_width = self._instance.getPopupInstance().input_win.width
-        text = "{:<{prompt_width}}{:>{count_width}}{:>{total_width}} ".format(prompt+pattern,
-                "{}/{}".format(lfEval("line_num"), lfEval("g:Lf_{}_StlResultsCount".format(self._instance._category))),
-                lfEval("g:Lf_{}_StlTotal".format(self._instance._category)),
-                prompt_width=input_win_width-19, count_width=10, total_width=8)
+        lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
+        line_num = lfEval("line_num")
+        result_count = lfEval("g:Lf_{}_StlResultsCount".format(self._instance._category))
+        total = lfEval("g:Lf_{}_StlTotal".format(self._instance._category))
+
+        part1 = prompt + pattern
+        part2 = "{}/{}".format(line_num, result_count)
+        part3 = total
+        text = "{:<{part1_width}} {:>{part2_width}} {:>{part3_width}} ".format(part1,
+                                                                               part2,
+                                                                               part3,
+                                                                               part1_width=input_win_width-3-len(part2)-len(part3),
+                                                                               part2_width=len(part2),
+                                                                               part3_width=len(part3))
         lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(text)))
         lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_winid)
         lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_winid, len(prompt)))
