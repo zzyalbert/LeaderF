@@ -175,10 +175,10 @@ class LfCli(object):
         lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
 
         input_win_width = self._instance.getPopupInstance().input_win.width
-        text = "{:<68}{:>{count_width}}{:>{total_width}} ".format(prompt+pattern,
+        text = "{:<{prompt_width}}{:>{count_width}}{:>{total_width}} ".format(prompt+pattern,
                 "{}/{}".format(lfEval("line_num"), lfEval("g:Lf_{}_StlResultsCount".format(self._instance._category))),
                 lfEval("g:Lf_{}_StlTotal".format(self._instance._category)),
-                count_width=input_win_width-77, total_width=8)
+                prompt_width=input_win_width-19, count_width=10, total_width=8)
         lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(text)))
         lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_winid)
         lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_winid, len(prompt)))

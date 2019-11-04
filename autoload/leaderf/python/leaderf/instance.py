@@ -401,6 +401,44 @@ class LfInstance(object):
 
             self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
 
+            if lfEval("get(g:, 'Lf_ShowPopupStatusline', 0)") == '1':
+                input_win_options = {
+                        "maxwidth":        maxwidth,
+                        "minwidth":        maxwidth,
+                        "maxheight":       1,
+                        "zindex":          20480,
+                        "pos":             "topleft",
+                        "line":            line,
+                        "col":             col,
+                        "padding":         [0, 0, 0, 1],
+                        "scrollbar":       0,
+                        "mapping":         0,
+                        # "border":          [0, 1, 0, 0],
+                        # "borderchars":     [' '],
+                        # "borderhighlight": ["Lf_hl_previewTitle"],
+                        # "filter":          "leaderf#PopupFilter",
+                        }
+
+                buf_number = int(lfEval("bufadd('')"))
+                lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(input_win_options)))
+                winid = int(lfEval("winid"))
+                lfCmd("call win_execute(%d, 'setlocal nobuflisted')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal buftype=nofile')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal bufhidden=hide')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal undolevels=-1')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal noswapfile')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal nolist')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal nonumber norelativenumber')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal nospell')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal nofoldenable')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal foldmethod=manual')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
+
+                self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
             lfCmd("""call leaderf#ResetCallback(%d, function('leaderf#PopupClosed', [%s]))"""
                     % (self._popup_winid, str(self._popup_instance.getWinIdList())))
 
