@@ -127,12 +127,14 @@ class LfInstance(object):
     This class is used to indicate the LeaderF instance, which including
     the tabpage, the window, the buffer, the statusline, etc.
     """
-    def __init__(self, category,
+    def __init__(self, category, cli,
                  before_enter_cb,
                  after_enter_cb,
                  before_exit_cb,
                  after_exit_cb):
         self._category = category
+        self._cli = cli
+        self._cli.setInstance(self)
         self._before_enter = before_enter_cb
         self._after_enter = after_enter_cb
         self._before_exit = before_exit_cb
@@ -215,10 +217,13 @@ class LfInstance(object):
         lfCmd("setlocal filetype=leaderf")
 
     def _setStatusline(self):
+        if self._win_pos == 'popup':
+            self._initStlVar()
+            return
+
         self._initStlVar()
         self.window.options["statusline"] = self._stl
-        if self._win_pos != 'popup':
-            lfCmd("redrawstatus")
+        lfCmd("redrawstatus")
         if not self._is_autocmd_set:
             self._is_autocmd_set = True
             lfCmd("augroup Lf_{}_Colorscheme".format(self._category))
@@ -541,6 +546,9 @@ class LfInstance(object):
         if lfEval("has('nvim')") == '1':
             lfCmd("redrawstatus")
 
+        if self._win_pos == 'popup':
+            self._cli._buildPopupPrompt()
+
     def setStlRunning(self, running):
         if running:
             status = (':', ' ')
@@ -577,14 +585,13 @@ class LfInstance(object):
                 lfCmd("set showtabline=0")
             self._createBufWindow(win_pos)
             self._setAttributes()
-            self._setStatusline()
         else:
             self._orig_win_nr = vim.current.window.number
             self._orig_win_id = lfWinId(self._orig_win_nr)
             self._createBufWindow(win_pos)
             self._setAttributes()
-            self._setStatusline()
 
+        self._setStatusline()
         self._after_enter()
 
     def exitBuffer(self):

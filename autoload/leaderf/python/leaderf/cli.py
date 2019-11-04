@@ -40,8 +40,8 @@ def cursorController(func):
 # LfCli
 #*****************************************************
 class LfCli(object):
-    def __init__(self, manager):
-        self._manager = manager
+    def __init__(self):
+        self._instance = None
         self._cmdline = []
         self._pattern = ''
         self._cursor_pos = 0
@@ -56,6 +56,9 @@ class LfCli(object):
         self._supports_refine = False
         self._is_and_mode = False
         self._setDefaultMode()
+
+    def setInstance(self, instance):
+        self._instance = instance
 
     def _setDefaultMode(self):
         mode = lfEval("g:Lf_DefaultMode")
@@ -166,8 +169,21 @@ class LfCli(object):
             prompt = 'R>> '
 
         pattern = ''.join(self._cmdline)
-        input_winid = self._manager._getInstance().getPopupInstance().input_win.id
-        lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(prompt+pattern)))
+        input_winid = self._instance.getPopupInstance().input_win.id
+        content_winid = self._instance.getPopupInstance().content_win.id
+        lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
+        lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
+
+        input_win_width = self._instance.getPopupInstance().input_win.width
+        text = "{:<68}{:>{count_width}}{:>{total_width}} ".format(prompt+pattern,
+                "{}/{}".format(lfEval("line_num"), lfEval("g:Lf_{}_StlResultsCount".format(self._instance._category))),
+                lfEval("g:Lf_{}_StlTotal".format(self._instance._category)),
+                count_width=input_win_width-77, total_width=8)
+        lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(text)))
+        lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_winid)
+        lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_winid, len(prompt)))
+        lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_cursor'})")""" % input_winid)
+        lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_cursor'})")""" % (input_winid, len(prompt)+self._cursor_pos+1))
         lfCmd("redraw")
 
     def _buildPrompt(self):
@@ -189,7 +205,7 @@ class LfCli(object):
             elif self._idle:
                 return
 
-        if self._manager._getInstance().getWinPos() == 'popup':
+        if self._instance.getWinPos() == 'popup':
             self._buildPopupPrompt()
             return
 

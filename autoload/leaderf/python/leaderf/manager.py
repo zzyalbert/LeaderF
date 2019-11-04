@@ -84,7 +84,7 @@ class Manager(object):
     def __init__(self):
         self._autochdir = 0
         self._instance = None
-        self._cli = LfCli(self)
+        self._cli = LfCli()
         self._explorer = None
         self._content = []
         self._index = 0
@@ -483,6 +483,7 @@ class Manager(object):
     def _getInstance(self):
         if self._instance is None:
             self._instance = LfInstance(self._getExplorer().getStlCategory(),
+                                        self._cli,
                                         self._beforeEnter,
                                         self._afterEnter,
                                         self._beforeExit,
@@ -1873,6 +1874,8 @@ class Manager(object):
             if self._read_finished == 1:
                 self._read_finished += 1
                 self._getExplorer().setContent(self._content)
+                self._getInstance().setStlTotal(len(self._content)//self._getUnit())
+                self._getInstance().setStlRunning(False)
 
                 if self._cli.pattern:
                     self._getInstance().setStlResultsCount(len(self._result_content))
@@ -1914,8 +1917,6 @@ class Manager(object):
 
                     self._getInstance().setStlResultsCount(len(self._content))
 
-                self._getInstance().setStlTotal(len(self._content)//self._getUnit())
-                self._getInstance().setStlRunning(False)
                 if self._getInstance().getWinPos() != 'popup':
                     lfCmd("redrawstatus")
 
