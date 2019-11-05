@@ -352,21 +352,12 @@ function! leaderf#PopupClosed(id_list, winid, result) abort
     endif
 endfunction
 
-function! leaderf#ResetFilter(winid, filter) abort
+function! leaderf#ResetPopupOptions(winid, option, value) abort
     let opts = popup_getoptions(a:winid)
     " https://github.com/vim/vim/issues/5081
     silent! unlet opts.mousemoved
     silent! unlet opts.moved
-    let opts.filter = a:filter
-    call popup_setoptions(a:winid, opts)
-endfunction
-
-function! leaderf#ResetCallback(winid, callback) abort
-    let opts = popup_getoptions(a:winid)
-    " https://github.com/vim/vim/issues/5081
-    silent! unlet opts.mousemoved
-    silent! unlet opts.moved
-    let opts.callback = a:callback
+    let opts[a:option] = a:value
     call popup_setoptions(a:winid, opts)
 endfunction
 " `pos` - A list with three numbers, e.g., [23, 11, 3]. As above, but

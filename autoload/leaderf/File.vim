@@ -69,7 +69,7 @@ function! leaderf#File#NormalModeFilter(winid, key) abort
     elseif key == "q" || key ==? "<ESC>"
         exec g:Lf_py "fileExplManager.quit()"
     elseif key == "i" || key ==? "<Tab>"
-        call leaderf#ResetFilter(a:winid, 'leaderf#PopupFilter')
+        call leaderf#ResetPopupOptions(a:winid, 'filter', 'leaderf#PopupFilter')
         exec g:Lf_py "fileExplManager.input()"
     elseif key == "o" || key ==? "<CR>" || key ==? "<2-LeftMouse>"
         exec g:Lf_py "fileExplManager.accept()"

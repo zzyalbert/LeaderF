@@ -11,10 +11,11 @@ from .utils import *
 
 
 class PopupWindow(object):
-    def __init__(self, winid, buffer, tabpage):
+    def __init__(self, winid, buffer, tabpage, init_line):
         self._winid = winid
         self._buffer = buffer
         self._tabpage = tabpage
+        self._init_line = init_line
 
     @property
     def id(self):
@@ -58,6 +59,10 @@ class PopupWindow(object):
     @property
     def valid(self):
         return int(lfEval("winbufnr(%d)" % self._winid)) != -1
+
+    @property
+    def initialLine(self):
+        return self._init_line
 
     def close(self):
         lfCmd("call popup_close(%d)" % self._winid)
@@ -157,6 +162,7 @@ class LfInstance(object):
         self._ignore_cur_buffer_name = lfEval("get(g:, 'Lf_IgnoreCurrentBufferName', 0)") == '1' \
                                             and self._category in ["File"]
         self._popup_winid = 0
+        self._popup_maxheight = 0
         self._popup_instance = LfPopupInstance()
         self._win_pos = None
         self._highlightStl()
@@ -323,10 +329,12 @@ class LfInstance(object):
             if col <= 0:
                 col = 1
 
+            self._popup_maxheight = max(maxheight - 1, 1) # there is an input window above
+
             options = {
                     "maxwidth":        maxwidth,
                     "minwidth":        maxwidth,
-                    "maxheight":       max(maxheight - 1, 1), # there is an input window above
+                    "maxheight":       self._popup_maxheight,
                     "zindex":          20480,
                     "pos":             "topleft",
                     "line":            line + 1,      # there is an input window above
@@ -360,7 +368,7 @@ class LfInstance(object):
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]
-            self._window_object = PopupWindow(self._popup_winid, self._buffer_object, self._tabpage_object)
+            self._window_object = PopupWindow(self._popup_winid, self._buffer_object, self._tabpage_object, line+1)
             self._popup_instance.content_win = self._window_object
 
             input_win_options = {
@@ -374,10 +382,6 @@ class LfInstance(object):
                     "padding":         [0, 0, 0, 1],
                     "scrollbar":       0,
                     "mapping":         0,
-                    # "border":          [0, 1, 0, 0],
-                    # "borderchars":     [' '],
-                    # "borderhighlight": ["Lf_hl_previewTitle"],
-                    # "filter":          "leaderf#PopupFilter",
                     }
 
             buf_number = int(lfEval("bufadd('')"))
@@ -399,28 +403,24 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
-            self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
+            self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage, line)
 
-            if lfEval("get(g:, 'Lf_ShowPopupStatusline', 0)") == '1':
-                input_win_options = {
+            if lfEval("get(g:, 'Lf_ShowPopupStatusline', 1)") == '1':
+                statusline_win_options = {
                         "maxwidth":        maxwidth,
                         "minwidth":        maxwidth,
                         "maxheight":       1,
                         "zindex":          20480,
                         "pos":             "topleft",
-                        "line":            line,
+                        "line":            line + maxheight,
                         "col":             col,
                         "padding":         [0, 0, 0, 1],
                         "scrollbar":       0,
                         "mapping":         0,
-                        # "border":          [0, 1, 0, 0],
-                        # "borderchars":     [' '],
-                        # "borderhighlight": ["Lf_hl_previewTitle"],
-                        # "filter":          "leaderf#PopupFilter",
                         }
 
                 buf_number = int(lfEval("bufadd('')"))
-                lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(input_win_options)))
+                lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(statusline_win_options)))
                 winid = int(lfEval("winid"))
                 lfCmd("call win_execute(%d, 'setlocal nobuflisted')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal buftype=nofile')" % winid)
@@ -438,9 +438,9 @@ class LfInstance(object):
                 lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
-                self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
+                self._popup_instance.statusline_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage, line + maxheight)
 
-            lfCmd("""call leaderf#ResetCallback(%d, function('leaderf#PopupClosed', [%s]))"""
+            lfCmd("call leaderf#ResetPopupOptions(%d, 'callback', function('leaderf#PopupClosed', [%s]))"
                     % (self._popup_winid, str(self._popup_instance.getWinIdList())))
 
     def _createBufWindow(self, win_pos):
@@ -758,6 +758,13 @@ class LfInstance(object):
             else:
                 self._buffer_object[:] = content
         finally:
+            statusline_win = self._popup_instance.statusline_win
+            if self._win_pos == 'popup' and statusline_win:
+                if len(self._buffer_object) < self._popup_maxheight \
+                        or int(lfEval("popup_getpos(%d).line" % statusline_win.id)) != statusline_win.initialLine:
+                    lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id,
+                        self._window_object.initialLine + min(len(self._buffer_object), self._popup_maxheight)))
+
             self.buffer.options['modifiable'] = False
 
     def appendBuffer(self, content):

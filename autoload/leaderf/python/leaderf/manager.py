@@ -255,7 +255,7 @@ class Manager(object):
 
     def _bangEnter(self):
         if self._getInstance().getWinPos() == 'popup':
-            lfCmd("call leaderf#ResetFilter(%d, '%s')" % (self._getInstance().getPopupWinId(),
+            lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
                     'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
 
         self._resetHighlights()
@@ -1978,7 +1978,8 @@ class Manager(object):
     @modifiableController
     def input(self):
         if self._getInstance().getWinPos() == 'popup':
-            lfCmd("call leaderf#ResetFilter(%d, '%s')" % (self._getInstance().getPopupWinId(), 'leaderf#PopupFilter'))
+            lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')"
+                    % (self._getInstance().getPopupWinId(), 'leaderf#PopupFilter'))
 
         if self._timer_id is not None:
             lfCmd("call timer_stop(%s)" % self._timer_id)
@@ -2064,7 +2065,7 @@ class Manager(object):
                 break
             elif equal(cmd, '<Tab>'):   # switch to Normal mode
                 if self._getInstance().getWinPos() == 'popup':
-                    lfCmd("call leaderf#ResetFilter(%d, '%s')" % (self._getInstance().getPopupWinId(),
+                    lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
                             'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
                 self._setResultContent()
                 self.clearSelections()
