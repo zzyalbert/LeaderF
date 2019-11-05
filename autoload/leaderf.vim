@@ -355,8 +355,8 @@ endfunction
 function! leaderf#ResetFilter(winid, filter) abort
     let opts = popup_getoptions(a:winid)
     " https://github.com/vim/vim/issues/5081
-    unlet opts.mousemoved
-    unlet opts.moved
+    silent! unlet opts.mousemoved
+    silent! unlet opts.moved
     let opts.filter = a:filter
     call popup_setoptions(a:winid, opts)
 endfunction
@@ -364,8 +364,8 @@ endfunction
 function! leaderf#ResetCallback(winid, callback) abort
     let opts = popup_getoptions(a:winid)
     " https://github.com/vim/vim/issues/5081
-    unlet opts.mousemoved
-    unlet opts.moved
+    silent! unlet opts.mousemoved
+    silent! unlet opts.moved
     let opts.callback = a:callback
     call popup_setoptions(a:winid, opts)
 endfunction

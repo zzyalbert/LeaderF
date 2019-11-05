@@ -439,6 +439,7 @@ class LfInstance(object):
                 lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
                 self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage)
+
             lfCmd("""call leaderf#ResetCallback(%d, function('leaderf#PopupClosed', [%s]))"""
                     % (self._popup_winid, str(self._popup_instance.getWinIdList())))
 
