@@ -56,6 +56,7 @@ class LfCli(object):
         self._supports_refine = False
         self._is_and_mode = False
         self._running_status = 0
+        self._input_buf_namespace = None
         self._setDefaultMode()
 
     def setInstance(self, instance):
@@ -170,11 +171,9 @@ class LfCli(object):
             prompt = 'R>> '
 
         pattern = ''.join(self._cmdline)
+        input_window = self._instance.getPopupInstance().input_win
         content_winid = self._instance.getPopupInstance().content_win.id
-        if self._instance.getWinPos() == 'popup':
-            input_win_width = self._instance.getPopupInstance().input_win.width
-        else:
-            input_win_width = self._instance.getPopupInstance().input_win.width - 1
+        input_win_width = input_window.width
         if self._instance.getWinPos() == 'popup':
             lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
             line_num = lfEval("line_num")
@@ -201,15 +200,22 @@ class LfCli(object):
                                                                                part2_width=len(part2),
                                                                                part3_width=len(part3))
         if self._instance.getWinPos() == 'popup':
-            input_winid = self._instance.getPopupInstance().input_win.id
-            lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(text)))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_winid)
-            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_winid, len(prompt)))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_cursor'})")""" % input_winid)
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_cursor'})")""" % (input_winid, len(prompt)+self._cursor_pos+1))
+            lfCmd("""call popup_settext(%d, '%s')""" % (input_window.id, escQuote(text)))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_window.id)
+            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_window.id, len(prompt)))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_cursor'})")""" % input_window.id)
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_cursor'})")""" % (input_window.id, len(prompt)+self._cursor_pos+1))
             lfCmd("redraw")
         else:
             self._instance._popup_instance.input_win.buffer[0] = text
+            if self._input_buf_namespace is None:
+                self._input_buf_namespace = int(lfEval("nvim_create_namespace('')"))
+            else:
+                lfCmd("call nvim_buf_clear_namespace(%d, %d, 0, -1)" % (input_window.buffer.number, self._input_buf_namespace))
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_prompt', 0, 0, 4)" % (input_window.buffer.number, self._input_buf_namespace))
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_cursor', 0, %d, %d+1)"
+                        % (input_window.buffer.number, self._input_buf_namespace, len(prompt)+self._cursor_pos, len(prompt)+self._cursor_pos))
+
             lfCmd("redraw")
 
     def _buildPrompt(self):

@@ -290,7 +290,10 @@ class LfInstance(object):
             lfCmd("augroup END")
 
     def _createPopupWindow(self):
-        if self._window_object is not None and isinstance(self._window_object, PopupWindow): # type is PopupWindow
+        # `type(self._window_object) != type(vim.current.window)` is necessary, error occurs if
+        # `Leaderf file --popup` after `Leaderf file` without it.
+        if self._window_object is not None and type(self._window_object) != type(vim.current.window)\
+                and isinstance(self._window_object, PopupWindow): # type is PopupWindow
             if self._window_object.tabpage == vim.current.tabpage:
                 if self._popup_winid > 0 and self._window_object.valid: # invalid if cleared by popup_clear()
                     self._popup_instance.show()
@@ -373,9 +376,40 @@ class LfInstance(object):
             lfCmd("call nvim_win_set_option(%d, 'spell', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
-            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 1)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 0)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Lf_hl_input_text')" % winid)
             self._popup_instance.input_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
+
+            if lfEval("get(g:, 'Lf_ShowPopupStatusline', 1)") == '1':
+                stl_win_config = {
+                        "relative": "editor",
+                        "anchor"  : "NW",
+                        "height"  : 1,
+                        "width"   : maxwidth,
+                        "row"     : line + maxheight,
+                        "col"     : col
+                        }
+                buf_number = int(lfEval("bufadd('')"))
+                lfCmd("silent let winid = nvim_open_win(%d, 0, %s)" % (buf_number, str(stl_win_config)))
+                winid = int(lfEval("winid"))
+                lfCmd("call nvim_buf_set_option(%d, 'buflisted', v:false)" % buf_number)
+                lfCmd("call nvim_buf_set_option(%d, 'buftype', 'nofile')" % buf_number)
+                lfCmd("call nvim_buf_set_option(%d, 'bufhidden', 'hide')" % buf_number)
+                lfCmd("call nvim_buf_set_option(%d, 'undolevels', -1)" % buf_number)
+                lfCmd("call nvim_buf_set_option(%d, 'swapfile', v:false)" % buf_number)
+                lfCmd("call nvim_buf_set_option(%d, 'filetype', 'leaderf')" % buf_number)
+
+                lfCmd("call nvim_win_set_option(%d, 'list', v:false)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'number', v:false)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'relativenumber', v:false)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'spell', v:false)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 0)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Statusline')" % winid)
+                self._popup_instance.statusline_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
         else:
             self._win_pos = "popup"
 
@@ -448,7 +482,7 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % winid)
             lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
             lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
-            lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
+            lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_input_text')" % winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
             self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage, line)

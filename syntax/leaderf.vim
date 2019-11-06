@@ -32,6 +32,7 @@ if has("syntax")
     highlight def link Lf_hl_popup_window       Pmenu
     highlight def link Lf_hl_cursor             Cursor
     highlight def link Lf_hl_prompt             Constant
+    highlight def link Lf_hl_input_text         Statusline
     if &background ==? "dark"
         highlight def Lf_hl_match  gui=bold guifg=SpringGreen cterm=bold ctermfg=48
         highlight def Lf_hl_match0 gui=bold guifg=SpringGreen cterm=bold ctermfg=48
