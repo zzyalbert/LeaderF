@@ -10,6 +10,56 @@ import itertools
 from .utils import *
 
 
+class FloatWindow(object):
+    def __init__(self, winid, window, buffer, tabpage):
+        self._winid = winid
+        self._window = window
+        self._buffer = buffer
+        self._tabpage = tabpage
+
+    @property
+    def id(self):
+        return self._winid
+
+    @property
+    def buffer(self):
+        return self._buffer
+
+    @buffer.setter
+    def buffer(self, buffer):
+        self._buffer = buffer
+
+    @property
+    def tabpage(self):
+        return self._tabpage
+
+    @property
+    def cursor(self):
+        return self._window.cursor
+
+    @cursor.setter
+    def cursor(self, cursor):
+        self._window.cursor = cursor
+
+    @property
+    def height(self):
+        return self._window.height
+
+    @property
+    def width(self):
+        return self._window.width
+
+    @property
+    def number(self):
+        return self._window.number
+
+    @property
+    def valid(self):
+        return self._window.valid
+
+    def close(self):
+        lfCmd("call nvim_win_close(%d, 0)" % self._winid)
+
 class PopupWindow(object):
     def __init__(self, winid, buffer, tabpage, init_line):
         self._winid = winid
@@ -223,7 +273,7 @@ class LfInstance(object):
         lfCmd("setlocal filetype=leaderf")
 
     def _setStatusline(self):
-        if self._win_pos == 'popup':
+        if self._win_pos in ('popup', 'floatwin'):
             self._initStlVar()
             return
 
@@ -240,7 +290,7 @@ class LfInstance(object):
             lfCmd("augroup END")
 
     def _createPopupWindow(self):
-        if self._window_object is not None and type(self._window_object) != type(vim.current.window): # type is PopupWindow
+        if self._window_object is not None and isinstance(self._window_object, PopupWindow): # type is PopupWindow
             if self._window_object.tabpage == vim.current.tabpage:
                 if self._popup_winid > 0 and self._window_object.valid: # invalid if cleared by popup_clear()
                     self._popup_instance.show()
@@ -250,86 +300,69 @@ class LfInstance(object):
 
         buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
 
+        width = int(lfEval("get(g:, 'Lf_PopupWidth', 0)"))
+        if width == 0:
+            maxwidth = int(int(lfEval("&columns")) * 2 // 3)
+        else:
+            maxwidth = min(width, int(lfEval("&columns")))
+
+        height = int(lfEval("get(g:, 'Lf_PopupHeight', 0)"))
+        if height == 0:
+            maxheight = int(int(lfEval("&lines")) * 0.4)
+        else:
+            maxheight = min(height, int(lfEval("&lines")))
+
+        position = [int(i) for i in lfEval("get(g:, 'Lf_PopupPosition', [0, 0])")]
+        if position == [0, 0]:
+            line = (int(lfEval("&lines")) - maxheight) // 2
+            col = (int(lfEval("&columns")) - maxwidth) // 2
+        else:
+            line, col = position
+            line = min(line, int(lfEval("&lines")) - maxheight)
+            col = min(col, int(lfEval("&columns")) - maxwidth)
+
+        if line <= 0:
+            line = 1
+
+        if col <= 0:
+            col = 1
+
+        self._popup_maxheight = max(maxheight - 1, 1) # there is an input window above
+
         if lfEval("has('nvim')") == '1':
             self._win_pos = "floatwin"
 
-            width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
-            if width == 0:
-                width = int(lfEval("&columns"))//2
-            else:
-                width = min(width, int(lfEval("&columns")))
-            maxheight = int(lfEval("&lines - (line('w$') - line('.')) - 3"))
-            maxheight -= int(self._getInstance().window.height) - int(lfEval("(line('w$') - line('w0') + 1)"))
-            relative = 'editor'
-            anchor = "SW"
-            row = maxheight
-            lfCmd("call bufload(%d)" % buf_number)
-            buffer_len = len(vim.buffers[buf_number])
-            height = min(maxheight, buffer_len)
-            pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
-            if pos.lower() == 'center':
-                col = (int(lfEval("&columns")) - width) // 2
-            elif pos.lower() == 'left':
-                col = 0
-            elif pos.lower() == 'right':
-                col = int(lfEval("&columns")) - width
-            else:
-                relative = 'cursor'
-                row = 0
-                col = 0
-
-            if maxheight < int(lfEval("&lines"))//2 - 2:
-                anchor = "NW"
-                if relative == 'cursor':
-                    row = 1
-                else:
-                    row = maxheight + 1
-                height = min(int(lfEval("&lines")) - maxheight - 3, buffer_len)
-
             config = {
-                    "relative": relative,
-                    "anchor"  : anchor,
-                    "height"  : height,
-                    "width"   : width,
-                    "row"     : row,
+                    "relative": "editor",
+                    "anchor"  : "NW",
+                    "height"  : self._popup_maxheight,
+                    "width"   : maxwidth,
+                    "row"     : line + 1,
                     "col"     : col
                     }
-            self._preview_winid = int(lfEval("nvim_open_win(%d, 0, %s)" % (buf_number, str(config))))
-            lfCmd("call nvim_win_set_option(%d, 'number', v:true)" % self._preview_winid)
-            lfCmd("call nvim_win_set_option(%d, 'cursorline', v:true)" % self._preview_winid)
-            if buffer_len >= line_nr > 0:
-                lfCmd("""call nvim_win_set_cursor(%d, [%d, 1])""" % (self._preview_winid, line_nr))
+            lfCmd("silent let winid = nvim_open_win(%d, 1, %s)" % (buf_number, str(config)))
+            self._popup_winid = int(lfEval("winid"))
+            self._setAttributes()
+
+            self._tabpage_object = vim.current.tabpage
+            self._buffer_object = vim.buffers[buf_number]
+            self._window_object = FloatWindow(self._popup_winid, vim.current.window, self._buffer_object, self._tabpage_object)
+            self._popup_instance.content_win = self._window_object
+
+            input_win_config = {
+                    "relative": "editor",
+                    "anchor"  : "NW",
+                    "height"  : 1,
+                    "width"   : maxwidth,
+                    "row"     : line,
+                    "col"     : col
+                    }
+            buf_number = int(lfEval("bufadd('')"))
+            lfCmd("silent let winid = nvim_open_win(%d, 0, %s)" % (buf_number, str(input_win_config)))
+            winid = int(lfEval("winid"))
+            self._popup_instance.input_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
         else:
             self._win_pos = "popup"
-
-            width = int(lfEval("get(g:, 'Lf_PopupWidth', 0)"))
-            if width == 0:
-                maxwidth = int(int(lfEval("&columns")) * 2 // 3)
-            else:
-                maxwidth = min(width, int(lfEval("&columns")))
-
-            height = int(lfEval("get(g:, 'Lf_PopupHeight', 0)"))
-            if height == 0:
-                maxheight = int(int(lfEval("&lines")) * 0.4)
-            else:
-                maxheight = min(height, int(lfEval("&lines")))
-
-            position = [int(i) for i in lfEval("get(g:, 'Lf_PopupPosition', [0, 0])")]
-            if position == [0, 0]:
-                line = (int(lfEval("&lines")) - maxheight) // 2
-                col = (int(lfEval("&columns")) - maxwidth) // 2
-            else:
-                line, col = position
-                line = min(line, int(lfEval("&lines")) - maxheight)
-                col = min(col, int(lfEval("&columns")) - maxwidth)
-
-            if line <= 0:
-                line = 1
-
-            if col <= 0:
-                col = 1
-
-            self._popup_maxheight = max(maxheight - 1, 1) # there is an input window above
 
             options = {
                     "maxwidth":        maxwidth,
@@ -645,6 +678,10 @@ class LfInstance(object):
 
         if self._win_pos == 'popup':
             self._popup_instance.hide()
+            self._after_exit()
+            return
+        if self._win_pos == 'floatwin':
+            self._popup_instance.close()
             self._after_exit()
             return
         elif self._win_pos == 'fullScreen':
