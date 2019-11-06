@@ -360,6 +360,21 @@ class LfInstance(object):
             buf_number = int(lfEval("bufadd('')"))
             lfCmd("silent let winid = nvim_open_win(%d, 0, %s)" % (buf_number, str(input_win_config)))
             winid = int(lfEval("winid"))
+            lfCmd("call nvim_buf_set_option(%d, 'buflisted', v:false)" % buf_number)
+            lfCmd("call nvim_buf_set_option(%d, 'buftype', 'nofile')" % buf_number)
+            lfCmd("call nvim_buf_set_option(%d, 'bufhidden', 'hide')" % buf_number)
+            lfCmd("call nvim_buf_set_option(%d, 'undolevels', -1)" % buf_number)
+            lfCmd("call nvim_buf_set_option(%d, 'swapfile', v:false)" % buf_number)
+            lfCmd("call nvim_buf_set_option(%d, 'filetype', 'leaderf')" % buf_number)
+
+            lfCmd("call nvim_win_set_option(%d, 'list', v:false)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'number', v:false)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'relativenumber', v:false)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'spell', v:false)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 1)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
             self._popup_instance.input_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
         else:
             self._win_pos = "popup"

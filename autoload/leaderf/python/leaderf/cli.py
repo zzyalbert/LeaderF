@@ -170,9 +170,11 @@ class LfCli(object):
             prompt = 'R>> '
 
         pattern = ''.join(self._cmdline)
-        input_winid = self._instance.getPopupInstance().input_win.id
         content_winid = self._instance.getPopupInstance().content_win.id
-        input_win_width = self._instance.getPopupInstance().input_win.width
+        if self._instance.getWinPos() == 'popup':
+            input_win_width = self._instance.getPopupInstance().input_win.width
+        else:
+            input_win_width = self._instance.getPopupInstance().input_win.width - 1
         if self._instance.getWinPos() == 'popup':
             lfCmd("""call win_execute(%d, 'let line_num = line(".")')""" % content_winid)
             line_num = lfEval("line_num")
@@ -199,6 +201,7 @@ class LfCli(object):
                                                                                part2_width=len(part2),
                                                                                part3_width=len(part3))
         if self._instance.getWinPos() == 'popup':
+            input_winid = self._instance.getPopupInstance().input_win.id
             lfCmd("""call popup_settext(%d, '%s')""" % (input_winid, escQuote(text)))
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_winid)
             lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_winid, len(prompt)))
@@ -207,10 +210,10 @@ class LfCli(object):
             lfCmd("redraw")
         else:
             self._instance._popup_instance.input_win.buffer[0] = text
+            lfCmd("redraw")
 
     def _buildPrompt(self):
-        # if lfEval("has('nvim')") == '1' and self._instance.getWinPos() != 'floatwin':
-        if lfEval("has('nvim')") == '1':
+        if lfEval("has('nvim')") == '1' and self._instance.getWinPos() != 'floatwin':
             self._buildNvimPrompt()
             return
 
