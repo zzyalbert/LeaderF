@@ -183,21 +183,47 @@ class BufExplManager(Manager):
 
     def _afterEnter(self):
         super(BufExplManager, self)._afterEnter()
-        id = int(lfEval("matchadd('Lf_hl_bufNumber', '^\s*\zs\d\+')"))
-        self._match_ids.append(id)
-        id = int(lfEval("matchadd('Lf_hl_bufIndicators', '^\s*\d\+\s*\zsu\=\s*[#%]\=...')"))
-        self._match_ids.append(id)
-        id = int(lfEval("matchadd('Lf_hl_bufModified', '^\s*\d\+\s*u\=\s*[#%]\=.+\s*\zs.*$')"))
-        self._match_ids.append(id)
-        id = int(lfEval("matchadd('Lf_hl_bufNomodifiable', '^\s*\d\+\s*u\=\s*[#%]\=..-\s*\zs.*$')"))
-        self._match_ids.append(id)
-        id = int(lfEval('''matchadd('Lf_hl_bufDirname', ' \zs".*"$')'''))
-        self._match_ids.append(id)
+        if self._getInstance().getWinPos() == 'popup':
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_bufNumber'', ''^\s*\zs\d\+'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_bufIndicators'', ''^\s*\d\+\s*\zsu\=\s*[#%%]\=...'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_bufModified'', ''^\s*\d\+\s*u\=\s*[#%%]\=.+\s*\zs.*$'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_bufNomodifiable'', ''^\s*\d\+\s*u\=\s*[#%%]\=..-\s*\zs.*$'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_bufDirname'', '' \zs".*"$'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
+        else:
+            id = int(lfEval("matchadd('Lf_hl_bufNumber', '^\s*\zs\d\+')"))
+            self._match_ids.append(id)
+            id = int(lfEval("matchadd('Lf_hl_bufIndicators', '^\s*\d\+\s*\zsu\=\s*[#%]\=...')"))
+            self._match_ids.append(id)
+            id = int(lfEval("matchadd('Lf_hl_bufModified', '^\s*\d\+\s*u\=\s*[#%]\=.+\s*\zs.*$')"))
+            self._match_ids.append(id)
+            id = int(lfEval("matchadd('Lf_hl_bufNomodifiable', '^\s*\d\+\s*u\=\s*[#%]\=..-\s*\zs.*$')"))
+            self._match_ids.append(id)
+            id = int(lfEval('''matchadd('Lf_hl_bufDirname', ' \zs".*"$')'''))
+            self._match_ids.append(id)
 
     def _beforeExit(self):
         super(BufExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
+        if self._getInstance().getWinPos() == 'popup':
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
+        else:
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d)" % i)
         self._match_ids = []
 
     def deleteBuffer(self, wipe=0):
@@ -213,11 +239,7 @@ class BufExplManager(Manager):
         lfCmd("confirm %s %d" % ('bw' if wipe else 'bd', buf_number))
         del instance._buffer_object[instance.window.cursor[0] - 1]
         if instance.getWinPos() == 'popup':
-            statusline_win = instance.getPopupInstance().statusline_win
-            if int(lfEval("popup_getpos(%d).line" % statusline_win.id)) != statusline_win.initialLine:
-                lfCmd("redraw!")
-                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id,
-                        instance.window.initialLine + instance.window.height))
+            instance.refreshPopupStatusline()
             lfCmd("call win_execute(%d, 'setlocal nomodifiable')" % instance.getPopupWinId())
         else:
             lfCmd("setlocal nomodifiable")

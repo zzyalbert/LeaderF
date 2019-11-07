@@ -80,7 +80,7 @@ function! leaderf#Buffer#NormalModeFilter(winid, key) abort
     elseif key == "d"
         exec g:Lf_py "bufExplManager.deleteBuffer(1)"
     elseif key == "D"
-        exec g:Lf_py "bufExplManager.deleteBuffer(1)"
+        exec g:Lf_py "bufExplManager.deleteBuffer()"
     endif
 
     return 1

@@ -1079,11 +1079,7 @@ class GtagsExplManager(Manager):
         # https://github.com/neovim/neovim/issues/9361
         del instance._buffer_object[instance.window.cursor[0] - 1]
         if instance.getWinPos() == 'popup':
-            statusline_win = instance.getPopupInstance().statusline_win
-            if int(lfEval("popup_getpos(%d).line" % statusline_win.id)) != statusline_win.initialLine:
-                lfCmd("redraw!")
-                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id,
-                        instance.window.initialLine + instance.window.height))
+            instance.refreshPopupStatusline()
             lfCmd("call win_execute(%d, 'setlocal nomodifiable')" % instance.getPopupWinId())
         else:
             lfCmd("setlocal nomodifiable")

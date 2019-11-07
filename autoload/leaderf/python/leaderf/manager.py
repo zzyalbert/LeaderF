@@ -426,6 +426,7 @@ class Manager(object):
                     "minwidth":        maxwidth,
                     "maxheight":       maxheight,
                     "minheight":       maxheight,
+                    "zindex":          20481,
                     "pos":             "botleft",
                     "line":            "cursor-1",
                     "col":             col,
@@ -442,7 +443,7 @@ class Manager(object):
                 options["maxheight"] = maxheight
                 options["minheight"] = maxheight
 
-            lfCmd("silent let winid = popup_create(%d, %s)" % (buf_number, str(options)))
+            lfCmd("silent! let winid = popup_create(%d, %s)" % (buf_number, str(options)))
             self._preview_winid = int(lfEval("winid"))
             lfCmd("call win_execute(%d, 'setlocal number norelativenumber')" % self._preview_winid)
             if line_nr > 0:
@@ -523,6 +524,8 @@ class Manager(object):
             self._getInstance().buffer.options['modifiable'] = False
             self._getInstance().window.cursor = (orig_row + self._help_length, 0)
 
+        self._getInstance().refreshPopupStatusline()
+
     def _hideHelp(self):
         self._getInstance().buffer.options['modifiable'] = True
         if self._getInstance().isReverseOrder():
@@ -546,6 +549,7 @@ class Manager(object):
                 lfCmd("call win_execute(%d, 'norm! %dk')" % (self._getInstance().getPopupWinId(), self._help_length))
 
         self._help_length = 0
+        self._getInstance().refreshPopupStatusline()
 
     def _getExplorer(self):
         if self._explorer is None:
