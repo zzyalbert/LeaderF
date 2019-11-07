@@ -60,3 +60,52 @@ exec g:Lf_py "<< EOF"
 gtagsExplManager._workInIdle(bang=True)
 EOF
 endfunction
+
+function! leaderf#Gtags#NormalModeFilter(winid, key) abort
+    let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
+
+    if key == "j" || key ==? "<Down>"
+        call win_execute(a:winid, "norm! j")
+        redraw
+    elseif key == "k" || key ==? "<Up>"
+        call win_execute(a:winid, "norm! k")
+        redraw
+    elseif key ==? "<PageUp>"
+        call win_execute(a:winid, "norm! \<PageUp>")
+    elseif key ==? "<PageDown>"
+        call win_execute(a:winid, "norm! \<PageDown>")
+    elseif key ==? "<LeftMouse>"
+        if has('patch-8.1.2266')
+            call win_execute(a:winid, "exec v:mouse_lnum")
+            call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
+            redraw
+        endif
+    elseif key ==? "<ScrollWheelUp>"
+        call win_execute(a:winid, "norm! 3k")
+        redraw
+    elseif key ==? "<ScrollWheelDown>"
+        call win_execute(a:winid, "norm! 3j")
+        redraw
+    elseif key == "q" || key ==? "<ESC>"
+        exec g:Lf_py "gtagsExplManager.quit()"
+    elseif key == "i" || key ==? "<Tab>"
+        call leaderf#ResetPopupOptions(a:winid, 'filter', 'leaderf#PopupFilter')
+        exec g:Lf_py "gtagsExplManager.input()"
+    elseif key == "o" || key ==? "<CR>" || key ==? "<2-LeftMouse>"
+        exec g:Lf_py "gtagsExplManager.accept()"
+    elseif key == "x"
+        exec g:Lf_py "gtagsExplManager.accept('h')"
+    elseif key == "v"
+        exec g:Lf_py "gtagsExplManager.accept('v')"
+    elseif key == "t"
+        exec g:Lf_py "gtagsExplManager.accept('t')"
+    elseif key == "p"
+        exec g:Lf_py "gtagsExplManager._previewResult(True)"
+    elseif key ==? "<F1>"
+        exec g:Lf_py "gtagsExplManager.toggleHelp()"
+    elseif key == "d"
+        exec g:Lf_py "gtagsExplManager.deleteCurrentLine()"
+    endif
+
+    return 1
+endfunction

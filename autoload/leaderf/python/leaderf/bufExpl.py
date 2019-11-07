@@ -201,14 +201,26 @@ class BufExplManager(Manager):
         self._match_ids = []
 
     def deleteBuffer(self, wipe=0):
-        if vim.current.window.cursor[0] <= self._help_length:
+        instance = self._getInstance()
+        if instance.window.cursor[0] <= self._help_length:
             return
-        lfCmd("setlocal modifiable")
-        line = vim.current.line
+        if instance.getWinPos() == 'popup':
+            lfCmd("call win_execute(%d, 'setlocal modifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal modifiable")
+        line = instance._buffer_object[instance.window.cursor[0] - 1]
         buf_number = int(re.sub(r"^.*?(\d+).*$", r"\1", line))
         lfCmd("confirm %s %d" % ('bw' if wipe else 'bd', buf_number))
-        del vim.current.line
-        lfCmd("setlocal nomodifiable")
+        del instance._buffer_object[instance.window.cursor[0] - 1]
+        if instance.getWinPos() == 'popup':
+            statusline_win = instance.getPopupInstance().statusline_win
+            if int(lfEval("popup_getpos(%d).line" % statusline_win.id)) != statusline_win.initialLine:
+                lfCmd("redraw!")
+                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id,
+                        instance.window.initialLine + instance.window.height))
+            lfCmd("call win_execute(%d, 'setlocal nomodifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal nomodifiable")
 
     def _previewInPopup(self, *args, **kwargs):
         line = args[0]

@@ -956,37 +956,88 @@ class GtagsExplManager(Manager):
 
     def _afterEnter(self):
         super(GtagsExplManager, self)._afterEnter()
-        if self._getExplorer().getResultFormat() is None:
-            id = int(lfEval('''matchadd('Lf_hl_gtagsFileName', '^.\{-}\ze\t')'''))
-            self._match_ids.append(id)
-            id = int(lfEval('''matchadd('Lf_hl_gtagsLineNumber', '\t\zs\d\+\ze\t')'''))
-            self._match_ids.append(id)
-        elif self._getExplorer().getResultFormat() == "ctags":
-            id = int(lfEval('''matchadd('Lf_hl_gtagsFileName', '\t\zs.\{-}\ze\t')'''))
-            self._match_ids.append(id)
-            id = int(lfEval('''matchadd('Lf_hl_gtagsLineNumber', '\t\zs\d\+$')'''))
-            self._match_ids.append(id)
-        elif self._getExplorer().getResultFormat() == "ctags-x":
-            id = int(lfEval('''matchadd('Lf_hl_gtagsFileName', '^\S\+\s\+\d\+\s\+\zs\S\+')'''))
-            self._match_ids.append(id)
-            id = int(lfEval('''matchadd('Lf_hl_gtagsLineNumber', '^\S\+\s\+\zs\d\+')'''))
-            self._match_ids.append(id)
-        else: # ctags-mod
-            id = int(lfEval('''matchadd('Lf_hl_gtagsFileName', '^.\{-}\ze\t')'''))
-            self._match_ids.append(id)
-            id = int(lfEval('''matchadd('Lf_hl_gtagsLineNumber', '\t\zs\d\+\ze\t')'''))
-            self._match_ids.append(id)
-        try:
-            for i in self._getExplorer().getPatternRegex():
-                id = int(lfEval("matchadd('Lf_hl_gtagsHighlight', '%s', 9)" % escQuote(i)))
+        if self._getInstance().getWinPos() == 'popup':
+            if self._getExplorer().getResultFormat() is None:
+                # \ should be escaped as \\\\
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsFileName', '^.\\\\{-}\\\\ze\\\\t')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
                 self._match_ids.append(id)
-        except vim.error:
-            pass
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsLineNumber', '\\\\t\\\\zs\\\\d\\\\+\\\\ze\\\\t')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+            elif self._getExplorer().getResultFormat() == "ctags":
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsFileName', '\\\\t\\\\zs.\\\\{-}\\\\ze\\\\t')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsLineNumber', '\\\\t\\\\zs\\\\d\\\\+$')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+            elif self._getExplorer().getResultFormat() == "ctags-x":
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsFileName', '^\\\\S\\\\+\\\\s\\\\+\\\\d\\\\+\\\\s\\\\+\\\\zs\\\\S\\\\+')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsLineNumber', '^\\\\S\\\\+\\\\s\\\\+\\\\zs\\\\d\\\\+')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+            else: # ctags-mod
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsFileName', '^.\\\\{-}\\\\ze\\\\t')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+                lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsLineNumber', '\\\\t\\\\zs\\\\d\\\\+\\\\ze\\\\t')")"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+            try:
+                for i in self._getExplorer().getPatternRegex():
+                    lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_gtagsHighlight', '%s', 9)")"""
+                            % (self._getInstance().getPopupWinId(), escQuote(i).replace('\\', '\\\\')))
+                    id = int(lfEval("matchid"))
+                    self._match_ids.append(id)
+            except vim.error:
+                pass
+        else:
+            if self._getExplorer().getResultFormat() is None:
+                id = int(lfEval("""matchadd('Lf_hl_gtagsFileName', '^.\{-}\ze\t')"""))
+                self._match_ids.append(id)
+                id = int(lfEval("""matchadd('Lf_hl_gtagsLineNumber', '\t\zs\d\+\ze\t')"""))
+                self._match_ids.append(id)
+            elif self._getExplorer().getResultFormat() == "ctags":
+                id = int(lfEval("""matchadd('Lf_hl_gtagsFileName', '\t\zs.\{-}\ze\t')"""))
+                self._match_ids.append(id)
+                id = int(lfEval("""matchadd('Lf_hl_gtagsLineNumber', '\t\zs\d\+$')"""))
+                self._match_ids.append(id)
+            elif self._getExplorer().getResultFormat() == "ctags-x":
+                id = int(lfEval("""matchadd('Lf_hl_gtagsFileName', '^\S\+\s\+\d\+\s\+\zs\S\+')"""))
+                self._match_ids.append(id)
+                id = int(lfEval("""matchadd('Lf_hl_gtagsLineNumber', '^\S\+\s\+\zs\d\+')"""))
+                self._match_ids.append(id)
+            else: # ctags-mod
+                id = int(lfEval("""matchadd('Lf_hl_gtagsFileName', '^.\{-}\ze\t')"""))
+                self._match_ids.append(id)
+                id = int(lfEval("""matchadd('Lf_hl_gtagsLineNumber', '\t\zs\d\+\ze\t')"""))
+                self._match_ids.append(id)
+            try:
+                for i in self._getExplorer().getPatternRegex():
+                    id = int(lfEval("matchadd('Lf_hl_gtagsHighlight', '%s', 9)" % escQuote(i)))
+                    self._match_ids.append(id)
+            except vim.error:
+                pass
 
     def _beforeExit(self):
         super(GtagsExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
+        if self._getInstance().getWinPos() == 'popup':
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
+        else:
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d)" % i)
         self._match_ids = []
         if self._timer_id is not None:
             lfCmd("call timer_stop(%s)" % self._timer_id)
@@ -1014,16 +1065,28 @@ class GtagsExplManager(Manager):
             instance.window.options["cursorline"] = True
 
     def deleteCurrentLine(self):
-        if vim.current.window.cursor[0] <= self._help_length:
+        instance = self._getInstance()
+        if instance.window.cursor[0] <= self._help_length:
             return
-        lfCmd("setlocal modifiable")
-        line = vim.current.line
+        if instance.getWinPos() == 'popup':
+            lfCmd("call win_execute(%d, 'setlocal modifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal modifiable")
+        line = instance._buffer_object[instance.window.cursor[0] - 1]
         if len(self._content) > 0:
             self._content.remove(line)
         # `del vim.current.line` does not work in neovim
         # https://github.com/neovim/neovim/issues/9361
-        del vim.current.buffer[vim.current.window.cursor[0] - 1]
-        lfCmd("setlocal nomodifiable")
+        del instance._buffer_object[instance.window.cursor[0] - 1]
+        if instance.getWinPos() == 'popup':
+            statusline_win = instance.getPopupInstance().statusline_win
+            if int(lfEval("popup_getpos(%d).line" % statusline_win.id)) != statusline_win.initialLine:
+                lfCmd("redraw!")
+                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id,
+                        instance.window.initialLine + instance.window.height))
+            lfCmd("call win_execute(%d, 'setlocal nomodifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal nomodifiable")
 
     def getArguments(self):
         if self._getExplorer().getLastResultFormat() is not None and \
