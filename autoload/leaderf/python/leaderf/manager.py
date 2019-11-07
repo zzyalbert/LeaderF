@@ -2069,8 +2069,11 @@ class Manager(object):
                 break
             elif equal(cmd, '<Tab>'):   # switch to Normal mode
                 if self._getInstance().getWinPos() == 'popup':
-                    lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
-                            'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
+                    if lfEval("exists('*leaderf#%s#NormalModeFilter')" % self._getExplorer().getStlCategory()) == '1':
+                        lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
+                                'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
+                    else:
+                        lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', 'leaderf#NormalModeFilter')" % self._getInstance().getPopupWinId())
                 self._setResultContent()
                 self.clearSelections()
                 self._cli.hideCursor()

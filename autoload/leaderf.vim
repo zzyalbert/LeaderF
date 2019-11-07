@@ -341,6 +341,36 @@ function! leaderf#PopupFilter(winid, key) abort
     return 0
 endfunction
 
+function! leaderf#NormalModeFilter(winid, key) abort
+    let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
+
+    if key == "j" || key ==? "<Down>"
+        call win_execute(a:winid, "norm! j")
+        redraw
+    elseif key == "k" || key ==? "<Up>"
+        call win_execute(a:winid, "norm! k")
+        redraw
+    elseif key ==? "<PageUp>"
+        call win_execute(a:winid, "norm! \<PageUp>")
+    elseif key ==? "<PageDown>"
+        call win_execute(a:winid, "norm! \<PageDown>")
+    elseif key ==? "<LeftMouse>"
+        if has('patch-8.1.2266')
+            call win_execute(a:winid, "exec v:mouse_lnum")
+            call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
+            redraw
+        endif
+    elseif key ==? "<ScrollWheelUp>"
+        call win_execute(a:winid, "norm! 3k")
+        redraw
+    elseif key ==? "<ScrollWheelDown>"
+        call win_execute(a:winid, "norm! 3j")
+        redraw
+    endif
+
+    return 1
+endfunction
+
 function! leaderf#PopupClosed(id_list, winid, result) abort
     " result is -1 if CTRL-C was pressed,
     if a:result == -1
