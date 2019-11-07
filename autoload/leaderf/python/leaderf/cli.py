@@ -212,9 +212,10 @@ class LfCli(object):
                 self._input_buf_namespace = int(lfEval("nvim_create_namespace('')"))
             else:
                 lfCmd("call nvim_buf_clear_namespace(%d, %d, 0, -1)" % (input_window.buffer.number, self._input_buf_namespace))
-                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_prompt', 0, 0, 4)" % (input_window.buffer.number, self._input_buf_namespace))
-                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_cursor', 0, %d, %d+1)"
-                        % (input_window.buffer.number, self._input_buf_namespace, len(prompt)+self._cursor_pos, len(prompt)+self._cursor_pos))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_prompt', 0, 0, %d)" % (input_window.buffer.number, self._input_buf_namespace, len(prompt)))
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_cursor', 0, %d, %d+1)"
+                    % (input_window.buffer.number, self._input_buf_namespace, len(prompt)+self._cursor_pos, len(prompt)+self._cursor_pos))
 
             lfCmd("redraw")
 
