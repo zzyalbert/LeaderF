@@ -637,9 +637,9 @@ class Manager(object):
     def _leftClick(self):
         if self._getInstance().window.number == int(lfEval("v:mouse_win")):
             if self._getInstance().getWinPos() == 'popup':
-                if int(lfEval("exists('v:mouse_popup_row')")) == 1 and int(lfEval("exists('v:mouse_popup_col')")) == 1:
-                    lfCmd("""call win_execute(%d, "exec v:mouse_popup_row")""" % (self._getInstance().getPopupWinId()))
-                    lfCmd("""call win_execute(%d, "exec 'norm!'.v:mouse_popup_col.'|'")""" % (self._getInstance().getPopupWinId()))
+                if int(lfEval("has('patch-8.1.2266')")) == 1:
+                    lfCmd("""call win_execute(%d, "exec v:mouse_lnum")""" % (self._getInstance().getPopupWinId()))
+                    lfCmd("""call win_execute(%d, "exec 'norm!'.v:mouse_col.'|'")""" % (self._getInstance().getPopupWinId()))
             else:
                 lfCmd("exec v:mouse_lnum")
                 lfCmd("exec 'norm!'.v:mouse_col.'|'")
