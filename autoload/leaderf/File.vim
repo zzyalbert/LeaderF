@@ -59,18 +59,23 @@ function! leaderf#File#NormalModeFilter(winid, key) abort
     if key == "j" || key ==? "<Down>"
         call win_execute(a:winid, "norm! j")
         redraw
+        exec g:Lf_py "fileExplManager._previewResult(False)"
     elseif key == "k" || key ==? "<Up>"
         call win_execute(a:winid, "norm! k")
         redraw
+        exec g:Lf_py "fileExplManager._previewResult(False)"
     elseif key ==? "<PageUp>"
         call win_execute(a:winid, "norm! \<PageUp>")
+        exec g:Lf_py "fileExplManager._previewResult(False)"
     elseif key ==? "<PageDown>"
         call win_execute(a:winid, "norm! \<PageDown>")
+        exec g:Lf_py "fileExplManager._previewResult(False)"
     elseif key ==? "<LeftMouse>"
         if has('patch-8.1.2266')
             call win_execute(a:winid, "exec v:mouse_lnum")
             call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
             redraw
+            exec g:Lf_py "fileExplManager._previewResult(False)"
         endif
     elseif key ==? "<ScrollWheelUp>"
         call win_execute(a:winid, "norm! 3k")

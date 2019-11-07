@@ -203,20 +203,32 @@ class MruExplManager(Manager):
     def _afterEnter(self):
         super(MruExplManager, self)._afterEnter()
         if "--no-split-path" not in self._arguments:
-            id = int(lfEval('''matchadd('Lf_hl_bufDirname', ' \zs".*"$')'''))
-            self._match_ids.append(id)
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_bufDirname'', '' \zs".*"$'')')"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
 
     def _beforeExit(self):
         super(MruExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
+        if self._getInstance().getWinPos() == 'popup':
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
+        else:
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d)" % i)
         self._match_ids = []
 
     def deleteMru(self):
-        if vim.current.window.cursor[0] <= self._help_length:
+        instance = self._getInstance()
+        if instance.window.cursor[0] <= self._help_length:
             return
-        lfCmd("setlocal modifiable")
-        line = vim.current.line
+        if instance.getWinPos() == 'popup':
+            lfCmd("call win_execute(%d, 'setlocal modifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal modifiable")
+        line = instance._buffer_object[instance.window.cursor[0] - 1]
+
         dirname = self._getDigest(line, 2)
         basename = self._getDigest(line, 1)
         self._explorer.delFromCache(dirname + basename)
@@ -224,8 +236,12 @@ class MruExplManager(Manager):
             self._content.remove(line)
         # `del vim.current.line` does not work in neovim
         # https://github.com/neovim/neovim/issues/9361
-        del vim.current.buffer[vim.current.window.cursor[0] - 1]
-        lfCmd("setlocal nomodifiable")
+        del instance._buffer_object[instance.window.cursor[0] - 1]
+        if instance.getWinPos() == 'popup':
+            instance.refreshPopupStatusline()
+            lfCmd("call win_execute(%d, 'setlocal nomodifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal nomodifiable")
 
     def _previewInPopup(self, *args, **kwargs):
         if len(args) == 0:
