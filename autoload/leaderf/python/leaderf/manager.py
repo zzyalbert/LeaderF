@@ -108,6 +108,7 @@ class Manager(object):
         self._preview_in_popup = lfEval("get(g:, 'Lf_PreviewInPopup', 0)") == '1'
         self._preview_winid = 0
         self._match_ids = []
+        self._vim_file_autoloaded = False
         self._getExplClass()
 
     #**************************************************************
@@ -229,6 +230,10 @@ class Manager(object):
         self._cur_buffer = vim.current.buffer
 
     def _afterEnter(self):
+        if self._vim_file_autoloaded == False:
+            lfCmd("silent! call leaderf#%s#A_not_existing_function()" % self._getExplorer().getStlCategory())
+            self._vim_file_autoloaded = True
+
         if "--nowrap" in self._arguments:
             self._getInstance().window.options['wrap'] = False
 
@@ -271,8 +276,12 @@ class Manager(object):
 
     def _bangEnter(self):
         if self._getInstance().getWinPos() == 'popup':
-            lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
-                    'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
+            if lfEval("exists('*leaderf#%s#NormalModeFilter')" % self._getExplorer().getStlCategory()) == '1':
+                lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
+                        'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
+            else:
+                lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', function('leaderf#NormalModeFilter', [%d]))"
+                        % (self._getInstance().getPopupWinId(), id(self)))
 
         self._resetHighlights()
         if self._cli.pattern and self._index == 0:

@@ -543,26 +543,59 @@ class RgExplManager(Manager):
 
     def _afterEnter(self):
         super(RgExplManager, self)._afterEnter()
-        if "-A" in self._arguments or "-B" in self._arguments or "-C" in self._arguments:
-            id = int(lfEval("matchadd('Lf_hl_rgFileName', '^.\{-}\ze\(:\d\+:\|-\d\+-\)', 10)"))
-        else:
-            id = int(lfEval("matchadd('Lf_hl_rgFileName', '^.\{-}\ze\:\d\+:', 10)"))
-        self._match_ids.append(id)
-        id = int(lfEval("matchadd('Lf_hl_rgLineNumber', '^.\{-}\zs:\d\+:', 10)"))
-        self._match_ids.append(id)
-        if "-A" in self._arguments or "-B" in self._arguments or "-C" in self._arguments:
-            id = int(lfEval("matchadd('Lf_hl_rgLineNumber2', '^.\{-}\zs-\d\+-', 10)"))
+        if self._getInstance().getWinPos() == 'popup':
+            if "-A" in self._arguments or "-B" in self._arguments or "-C" in self._arguments:
+                lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_rgFileName'', ''^.\{-}\ze\(:\d\+:\|-\d\+-\)'', 10)')"""
+                        % self._getInstance().getPopupWinId())
+            else:
+                lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_rgFileName'', ''^.\{-}\ze\:\d\+:'', 10)')"""
+                        % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
             self._match_ids.append(id)
-        if self._has_column:
-            id = int(lfEval("matchadd('Lf_hl_rgColumnNumber', '^.\{-}:\d\+:\zs\d\+:', 10)"))
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_rgLineNumber'', ''^.\{-}\zs:\d\+:'', 10)')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
             self._match_ids.append(id)
-
-        try:
-            for i in self._getExplorer().getPatternRegex():
-                id = int(lfEval("matchadd('Lf_hl_rgHighlight', '%s', 9)" % escQuote(i)))
+            if "-A" in self._arguments or "-B" in self._arguments or "-C" in self._arguments:
+                lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_rgLineNumber2'', ''^.\{-}\zs-\d\+-'', 10)')"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
                 self._match_ids.append(id)
-        except vim.error:
-            pass
+            if self._has_column:
+                lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_rgColumnNumber'', ''^.\{-}:\d\+:\zs\d\+:'', 10)')"""
+                        % self._getInstance().getPopupWinId())
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+
+            try:
+                for i in self._getExplorer().getPatternRegex():
+                    lfCmd("""call win_execute(%d, "let matchid = matchadd('Lf_hl_rgHighlight', '%s', 9)")"""
+                            % (self._getInstance().getPopupWinId(), escQuote(i).replace('\\', '\\\\')))
+                    id = int(lfEval("matchid"))
+                    self._match_ids.append(id)
+            except vim.error:
+                pass
+        else:
+            if "-A" in self._arguments or "-B" in self._arguments or "-C" in self._arguments:
+                id = int(lfEval("matchadd('Lf_hl_rgFileName', '^.\{-}\ze\(:\d\+:\|-\d\+-\)', 10)"))
+            else:
+                id = int(lfEval("matchadd('Lf_hl_rgFileName', '^.\{-}\ze\:\d\+:', 10)"))
+            self._match_ids.append(id)
+            id = int(lfEval("matchadd('Lf_hl_rgLineNumber', '^.\{-}\zs:\d\+:', 10)"))
+            self._match_ids.append(id)
+            if "-A" in self._arguments or "-B" in self._arguments or "-C" in self._arguments:
+                id = int(lfEval("matchadd('Lf_hl_rgLineNumber2', '^.\{-}\zs-\d\+-', 10)"))
+                self._match_ids.append(id)
+            if self._has_column:
+                id = int(lfEval("matchadd('Lf_hl_rgColumnNumber', '^.\{-}:\d\+:\zs\d\+:', 10)"))
+                self._match_ids.append(id)
+
+            try:
+                for i in self._getExplorer().getPatternRegex():
+                    id = int(lfEval("matchadd('Lf_hl_rgHighlight', '%s', 9)" % escQuote(i)))
+                    self._match_ids.append(id)
+            except vim.error:
+                pass
 
     def _beforeExit(self):
         super(RgExplManager, self)._beforeExit()
@@ -665,18 +698,26 @@ class RgExplManager(Manager):
         super(RgExplManager, self).startExplorer(win_pos, *args, **kwargs)
 
     def deleteCurrentLine(self):
-        if vim.current.window.cursor[0] <= self._help_length:
+        instance = self._getInstance()
+        if instance.window.cursor[0] <= self._help_length:
             return
-        lfCmd("setlocal modifiable")
-        line = vim.current.line
+        if instance.getWinPos() == 'popup':
+            lfCmd("call win_execute(%d, 'setlocal modifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal modifiable")
+        line = instance._buffer_object[instance.window.cursor[0] - 1]
         if len(self._content) > 0:
             self._content.remove(line)
             self._getInstance().setStlTotal(len(self._content)//self._getUnit())
             self._getInstance().setStlResultsCount(len(self._content)//self._getUnit())
         # `del vim.current.line` does not work in neovim
         # https://github.com/neovim/neovim/issues/9361
-        del vim.current.buffer[vim.current.window.cursor[0] - 1]
-        lfCmd("setlocal nomodifiable")
+        del instance._buffer_object[instance.window.cursor[0] - 1]
+        if instance.getWinPos() == 'popup':
+            instance.refreshPopupStatusline()
+            lfCmd("call win_execute(%d, 'setlocal nomodifiable')" % instance.getPopupWinId())
+        else:
+            lfCmd("setlocal nomodifiable")
 
     def _previewInPopup(self, *args, **kwargs):
         if len(args) == 0:
