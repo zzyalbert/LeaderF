@@ -341,24 +341,31 @@ function! leaderf#PopupFilter(winid, key) abort
     return 0
 endfunction
 
-function! leaderf#NormalModeFilter(winid, key) abort
+function! leaderf#NormalModeFilter(id, winid, key) abort
+    exec g:Lf_py "import ctypes"
+
     let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
 
     if key == "j" || key ==? "<Down>"
         call win_execute(a:winid, "norm! j")
         redraw
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key == "k" || key ==? "<Up>"
         call win_execute(a:winid, "norm! k")
         redraw
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key ==? "<PageUp>"
         call win_execute(a:winid, "norm! \<PageUp>")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key ==? "<PageDown>"
         call win_execute(a:winid, "norm! \<PageDown>")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key ==? "<LeftMouse>"
         if has('patch-8.1.2266')
             call win_execute(a:winid, "exec v:mouse_lnum")
             call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
             redraw
+            exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
         endif
     elseif key ==? "<ScrollWheelUp>"
         call win_execute(a:winid, "norm! 3k")
@@ -366,6 +373,29 @@ function! leaderf#NormalModeFilter(winid, key) abort
     elseif key ==? "<ScrollWheelDown>"
         call win_execute(a:winid, "norm! 3j")
         redraw
+    elseif key == "q" || key ==? "<ESC>"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.quit()", a:id)
+    elseif key == "i" || key ==? "<Tab>"
+        call leaderf#ResetPopupOptions(a:winid, 'filter', 'leaderf#PopupFilter')
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.input()", a:id)
+    elseif key == "o" || key ==? "<CR>" || key ==? "<2-LeftMouse>"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.accept()", a:id)
+    elseif key == "x"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.accept('h')", a:id)
+    elseif key == "v"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.accept('v')", a:id)
+    elseif key == "t"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.accept('t')", a:id)
+    elseif key == "s"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.addSelections()", a:id)
+    elseif key == "a"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.selectAll()", a:id)
+    elseif key == "c"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.clearSelections()", a:id)
+    elseif key == "p"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(True)", a:id)
+    elseif key ==? "<F1>"
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.toggleHelp()", a:id)
     endif
 
     return 1

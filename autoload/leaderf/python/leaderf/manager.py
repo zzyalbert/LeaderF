@@ -2073,7 +2073,8 @@ class Manager(object):
                         lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
                                 'leaderf#%s#NormalModeFilter' % self._getExplorer().getStlCategory()))
                     else:
-                        lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', 'leaderf#NormalModeFilter')" % self._getInstance().getPopupWinId())
+                        lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', function('leaderf#NormalModeFilter', [%d]))"
+                                % (self._getInstance().getPopupWinId(), id(self)))
                 self._setResultContent()
                 self.clearSelections()
                 self._cli.hideCursor()
