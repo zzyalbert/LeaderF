@@ -53,7 +53,6 @@ class LineExplorer(Explorer):
 class LineExplManager(Manager):
     def __init__(self):
         super(LineExplManager, self).__init__()
-        self._match_ids = []
 
     def _getExplClass(self):
         return LineExplorer
@@ -115,9 +114,6 @@ class LineExplManager(Manager):
 
     def _beforeExit(self):
         super(LineExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
         for k, v in self._cursorline_dict.items():
             if k.valid:
                 k.options["cursorline"] = v

@@ -387,7 +387,6 @@ class RgExplorer(Explorer):
 class RgExplManager(Manager):
     def __init__(self):
         super(RgExplManager, self).__init__()
-        self._match_ids = []
         self._match_path = False
         self._has_column = False
 
@@ -567,9 +566,6 @@ class RgExplManager(Manager):
 
     def _beforeExit(self):
         super(RgExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
         if self._timer_id is not None:
             lfCmd("call timer_stop(%s)" % self._timer_id)
             self._timer_id = None

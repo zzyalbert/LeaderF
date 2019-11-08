@@ -208,7 +208,6 @@ class FunctionExplorer(Explorer):
 class FunctionExplManager(Manager):
     def __init__(self):
         super(FunctionExplManager, self).__init__()
-        self._match_ids = []
         self._orig_line = ''
 
     def _getExplClass(self):
@@ -302,9 +301,6 @@ class FunctionExplManager(Manager):
 
     def _beforeExit(self):
         super(FunctionExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
         if self._timer_id is not None:
             lfCmd("call timer_stop(%s)" % self._timer_id)
             self._timer_id = None

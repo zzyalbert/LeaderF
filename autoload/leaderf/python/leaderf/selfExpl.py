@@ -58,7 +58,6 @@ class SelfExplorer(Explorer):
 class SelfExplManager(Manager):
     def __init__(self):
         super(SelfExplManager, self).__init__()
-        self._match_ids = []
 
     def _getExplClass(self):
         return SelfExplorer
@@ -131,9 +130,6 @@ class SelfExplManager(Manager):
 
     def _beforeExit(self):
         super(SelfExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
 
     def _supportsRefine(self):
         return True

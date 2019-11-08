@@ -94,7 +94,6 @@ class MruExplorer(Explorer):
 class MruExplManager(Manager):
     def __init__(self):
         super(MruExplManager, self).__init__()
-        self._match_ids = []
 
     def _getExplClass(self):
         return MruExplorer
@@ -211,13 +210,6 @@ class MruExplManager(Manager):
 
     def _beforeExit(self):
         super(MruExplManager, self)._beforeExit()
-        if self._getInstance().getWinPos() == 'popup':
-            for i in self._match_ids:
-                lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
-        else:
-            for i in self._match_ids:
-                lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
 
     def deleteMru(self):
         instance = self._getInstance()

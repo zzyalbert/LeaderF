@@ -53,7 +53,6 @@ class HelpExplorer(Explorer):
 class HelpExplManager(Manager):
     def __init__(self):
         super(HelpExplManager, self).__init__()
-        self._match_ids = []
 
     def _getExplClass(self):
         return HelpExplorer
@@ -119,9 +118,6 @@ class HelpExplManager(Manager):
 
     def _beforeExit(self):
         super(HelpExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
 
     def _supportsRefine(self):
         return True

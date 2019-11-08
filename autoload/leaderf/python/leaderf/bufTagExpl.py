@@ -209,7 +209,6 @@ class BufTagExplorer(Explorer):
 class BufTagExplManager(Manager):
     def __init__(self):
         super(BufTagExplManager, self).__init__()
-        self._match_ids = []
         self._supports_preview = int(lfEval("g:Lf_PreviewCode"))
         self._orig_line = ''
 
@@ -315,9 +314,6 @@ class BufTagExplManager(Manager):
 
     def _beforeExit(self):
         super(BufTagExplManager, self)._beforeExit()
-        for i in self._match_ids:
-            lfCmd("silent! call matchdelete(%d)" % i)
-        self._match_ids = []
         if self._timer_id is not None:
             lfCmd("call timer_stop(%s)" % self._timer_id)
             self._timer_id = None

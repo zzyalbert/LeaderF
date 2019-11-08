@@ -107,6 +107,7 @@ class Manager(object):
         self._empty_query = lfEval("get(g:, 'Lf_EmptyQuery', 1)") == '1'
         self._preview_in_popup = lfEval("get(g:, 'Lf_PreviewInPopup', 0)") == '1'
         self._preview_winid = 0
+        self._match_ids = []
         self._getExplClass()
 
     #**************************************************************
@@ -230,9 +231,15 @@ class Manager(object):
     def _afterEnter(self):
         if "--nowrap" in self._arguments:
             self._getInstance().window.options['wrap'] = False
+
         if self._getInstance().getWinPos() != 'popup':
             self._defineMaps()
-        lfCmd("runtime syntax/leaderf.vim")
+
+            id = int(lfEval("matchadd('Lf_hl_cursorline', '.*\%#.*', 9)"))
+            self._match_ids.append(id)
+        else:
+            lfCmd("call win_execute({}, 'syn match Lf_hl_cursorline /.*\%#.*/')".format(self._getInstance().getPopupWinId()))
+
         if is_fuzzyEngine_C:
             self._fuzzy_engine = fuzzyEngine.createFuzzyEngine(cpu_count, False)
 
@@ -250,6 +257,14 @@ class Manager(object):
             self._stop_reader_thread = True
 
         self._closePreviewPopup()
+
+        if self._getInstance().getWinPos() == 'popup':
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
+        else:
+            for i in self._match_ids:
+                lfCmd("silent! call matchdelete(%d)" % i)
+        self._match_ids = []
 
     def _afterExit(self):
         pass
