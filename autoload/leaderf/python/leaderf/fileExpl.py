@@ -609,12 +609,7 @@ class FileExplManager(Manager):
         return FileExplorer
 
     def _defineMaps(self):
-        if self._getInstance().getWinPos() != 'popup':
-            lfCmd("call leaderf#File#Maps()")
-        lfCmd("augroup Lf_File")
-        lfCmd("autocmd!")
-        lfCmd("autocmd VimLeavePre * call leaderf#File#cleanup()")
-        lfCmd("augroup END")
+        lfCmd("call leaderf#File#Maps()")
 
     def _createHelp(self):
         help = []
@@ -657,6 +652,13 @@ class FileExplManager(Manager):
                 return path
 
         return ""
+
+    def _afterEnter(self):
+        super(FileExplManager, self)._afterEnter()
+        lfCmd("augroup Lf_File")
+        lfCmd("autocmd!")
+        lfCmd("autocmd VimLeavePre * call leaderf#File#cleanup()")
+        lfCmd("augroup END")
 
     def _beforeExit(self):
         super(FileExplManager, self)._beforeExit()

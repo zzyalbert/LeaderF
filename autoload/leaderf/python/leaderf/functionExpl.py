@@ -216,11 +216,6 @@ class FunctionExplManager(Manager):
 
     def _defineMaps(self):
         lfCmd("call leaderf#Function#Maps()")
-        lfCmd("augroup Lf_Function")
-        lfCmd("autocmd!")
-        lfCmd("autocmd BufWipeout * call leaderf#Function#removeCache(expand('<abuf>'))")
-        lfCmd("autocmd VimLeavePre * call leaderf#Function#cleanup()")
-        lfCmd("augroup END")
 
     def _acceptSelection(self, *args, **kwargs):
         if len(args) == 0:
@@ -287,6 +282,11 @@ class FunctionExplManager(Manager):
 
     def _afterEnter(self):
         super(FunctionExplManager, self)._afterEnter()
+        lfCmd("augroup Lf_Function")
+        lfCmd("autocmd!")
+        lfCmd("autocmd BufWipeout * call leaderf#Function#removeCache(expand('<abuf>'))")
+        lfCmd("autocmd VimLeavePre * call leaderf#Function#cleanup()")
+        lfCmd("augroup END")
         id = int(lfEval('''matchadd('Lf_hl_funcKind', '^\w')'''))
         self._match_ids.append(id)
         id = int(lfEval('''matchadd('Lf_hl_funcReturnType', '^\w\t\zs.\{-}\ze\s*[~]\=\w\+\W\{-}[(\[]')'''))

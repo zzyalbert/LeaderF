@@ -218,11 +218,6 @@ class BufTagExplManager(Manager):
 
     def _defineMaps(self):
         lfCmd("call leaderf#BufTag#Maps()")
-        lfCmd("augroup Lf_BufTag")
-        lfCmd("autocmd!")
-        lfCmd("autocmd BufWipeout * call leaderf#BufTag#removeCache(expand('<abuf>'))")
-        lfCmd("autocmd VimLeavePre * call leaderf#BufTag#cleanup()")
-        lfCmd("augroup END")
 
     def _acceptSelection(self, *args, **kwargs):
         if len(args) == 0:
@@ -300,6 +295,11 @@ class BufTagExplManager(Manager):
 
     def _afterEnter(self):
         super(BufTagExplManager, self)._afterEnter()
+        lfCmd("augroup Lf_BufTag")
+        lfCmd("autocmd!")
+        lfCmd("autocmd BufWipeout * call leaderf#BufTag#removeCache(expand('<abuf>'))")
+        lfCmd("autocmd VimLeavePre * call leaderf#BufTag#cleanup()")
+        lfCmd("augroup END")
         id = int(lfEval('''matchadd('Lf_hl_buftagKind', '^[^\t]*\t\zs\S\+')'''))
         self._match_ids.append(id)
         id = int(lfEval('''matchadd('Lf_hl_buftagScopeType', '[^\t]*\t\S\+\s*\zs\w\+:')'''))

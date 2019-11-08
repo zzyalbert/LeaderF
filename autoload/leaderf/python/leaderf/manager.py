@@ -230,7 +230,8 @@ class Manager(object):
     def _afterEnter(self):
         if "--nowrap" in self._arguments:
             self._getInstance().window.options['wrap'] = False
-        self._defineMaps()
+        if self._getInstance().getWinPos() != 'popup':
+            self._defineMaps()
         lfCmd("runtime syntax/leaderf.vim")
         if is_fuzzyEngine_C:
             self._fuzzy_engine = fuzzyEngine.createFuzzyEngine(cpu_count, False)
