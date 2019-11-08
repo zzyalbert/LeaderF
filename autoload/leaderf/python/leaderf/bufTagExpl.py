@@ -436,7 +436,10 @@ class BufTagExplManager(Manager):
                 lfCmd("norm! 3kj")
                 self._getInstance().setLineNumber()
             else:
-                lfCmd("norm! 2k")
+                if self._getInstance().getWinPos() == 'popup':
+                    lfCmd("call win_execute(%d, 'norm! 2k')" % (self._getInstance().getPopupWinId()))
+                else:
+                    lfCmd("norm! 2k")
         else:
             super(BufTagExplManager, self)._toUp()
 
@@ -449,7 +452,10 @@ class BufTagExplManager(Manager):
                 lfCmd("norm! 2j")
                 self._getInstance().setLineNumber()
             else:
-                lfCmd("norm! 3jk")
+                if self._getInstance().getWinPos() == 'popup':
+                    lfCmd("call win_execute(%d, 'norm! 3jk')" % (self._getInstance().getPopupWinId()))
+                else:
+                    lfCmd("norm! 3jk")
         else:
             super(BufTagExplManager, self)._toDown()
 

@@ -1674,7 +1674,7 @@ class Manager(object):
 
     def _gotoFirstLine(self):
         if self._getInstance().getWinPos() == 'popup':
-            self._getInstance().window.cursor = (1, 0)
+            lfCmd("call win_execute({}, 'norm! gg')".format(self._getInstance().getPopupWinId()))
         else:
             lfCmd("normal! gg")
 
@@ -2028,7 +2028,8 @@ class Manager(object):
             cur_content = self._content[:cur_len]
             if equal(cmd, '<Update>'):
                 if self._getInstance().getWinPos() == 'popup':
-                    self._getInstance().window.cursor = (1, 0)
+                    if self._getInstance()._window_object.cursor[0] > 1:
+                        lfCmd("call win_execute({}, 'norm! gg')".format(self._getInstance().getPopupWinId()))
                 self._search(cur_content)
             elif equal(cmd, '<Shorten>'):
                 if self._getInstance().isReverseOrder():
