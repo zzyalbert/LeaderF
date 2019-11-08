@@ -151,14 +151,30 @@ class TagExplManager(Manager):
 
     def _afterEnter(self):
         super(TagExplManager, self)._afterEnter()
-        id = int(lfEval('''matchadd('Lf_hl_tagFile', '^.\{-}\t\zs.\{-}\ze\t')'''))
-        self._match_ids.append(id)
-        id = int(lfEval('''matchadd('Lf_hl_tagType', ';"\t\zs[cdefFgmpstuv]\ze\(\t\|$\)')'''))
-        self._match_ids.append(id)
-        keyword = ["namespace", "class", "enum", "file", "function", "kind", "struct", "union"]
-        for i in keyword:
-            id = int(lfEval('''matchadd('Lf_hl_tagKeyword', '\(;"\t.\{-}\)\@<=%s:')''' % i))
+        if self._getInstance().getWinPos() == 'popup':
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_tagFile'', ''^.\{-}\t\zs.\{-}\ze\t'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
             self._match_ids.append(id)
+            lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_tagType'', '';"\t\zs[cdefFgmpstuv]\ze\(\t\|$\)'')')"""
+                    % self._getInstance().getPopupWinId())
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
+            keyword = ["namespace", "class", "enum", "file", "function", "kind", "struct", "union"]
+            for i in keyword:
+                lfCmd("""call win_execute(%d, 'let matchid = matchadd(''Lf_hl_tagKeyword'', ''\(;"\t.\{-}\)\@<=%s:'')')"""
+                    % (self._getInstance().getPopupWinId(), i))
+                id = int(lfEval("matchid"))
+                self._match_ids.append(id)
+        else:
+            id = int(lfEval('''matchadd('Lf_hl_tagFile', '^.\{-}\t\zs.\{-}\ze\t')'''))
+            self._match_ids.append(id)
+            id = int(lfEval('''matchadd('Lf_hl_tagType', ';"\t\zs[cdefFgmpstuv]\ze\(\t\|$\)')'''))
+            self._match_ids.append(id)
+            keyword = ["namespace", "class", "enum", "file", "function", "kind", "struct", "union"]
+            for i in keyword:
+                id = int(lfEval('''matchadd('Lf_hl_tagKeyword', '\(;"\t.\{-}\)\@<=%s:')''' % i))
+                self._match_ids.append(id)
 
     def _beforeExit(self):
         super(TagExplManager, self)._beforeExit()
