@@ -235,6 +235,10 @@ class BufExplManager(Manager):
         else:
             lfCmd("setlocal modifiable")
         line = instance._buffer_object[instance.window.cursor[0] - 1]
+        if len(self._content) > 0:
+            self._content.remove(line)
+            self._getInstance().setStlTotal(len(self._content)//self._getUnit())
+            self._getInstance().setStlResultsCount(len(self._content)//self._getUnit())
         buf_number = int(re.sub(r"^.*?(\d+).*$", r"\1", line))
         lfCmd("confirm %s %d" % ('bw' if wipe else 'bd', buf_number))
         del instance._buffer_object[instance.window.cursor[0] - 1]

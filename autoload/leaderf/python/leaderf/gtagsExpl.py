@@ -1075,6 +1075,8 @@ class GtagsExplManager(Manager):
         line = instance._buffer_object[instance.window.cursor[0] - 1]
         if len(self._content) > 0:
             self._content.remove(line)
+            self._getInstance().setStlTotal(len(self._content)//self._getUnit())
+            self._getInstance().setStlResultsCount(len(self._content)//self._getUnit())
         # `del vim.current.line` does not work in neovim
         # https://github.com/neovim/neovim/issues/9361
         del instance._buffer_object[instance.window.cursor[0] - 1]
