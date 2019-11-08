@@ -335,6 +335,7 @@ function! leaderf#previewFilter(winid, key) abort
         redraw
         return 0
     endif
+    return 0
 endfunction
 
 function! leaderf#PopupFilter(winid, key) abort
