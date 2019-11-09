@@ -660,22 +660,28 @@ g:Lf_DiscardEmptyBuffer                           *g:Lf_DiscardEmptyBuffer*
 
 g:Lf_PopupWidth                                   *g:Lf_PopupWidth*
     Specify the width of the popup window or floating window when LeaderF is
-    in popup mode. The value should be a non-negative integer. If the value is
-    0, the width is 2/3 of the screen's width.
+    in popup mode. `Popup mode` is when |g:Lf_WindowPosition| is 'popup' or '--popup'
+    is in the options list of `Leaderf` command.
+    The value should be a non-negative integer. If the value is 0, the width
+    is 2/3 of the screen's width.
 
     Default value is 0.
 
 g:Lf_PopupHeight                                   *g:Lf_PopupHeight*
     Specify the height of the popup window or floating window when LeaderF is
-    in popup mode. The value should be a non-negative integer. If the value is
+    in popup mode. `Popup mode` is when |g:Lf_WindowPosition| is 'popup' or '--popup'
+    is in the options list of `Leaderf` command.
+    The value should be a non-negative integer. If the value is
     0, the height is 40% of the screen's height.
 
     Default value is 0.
 
 g:Lf_PopupPosition                                 *g:Lf_PopupPosition*
     Specify the coordinate of the topleft corner of popup window or floating
-    window when LeaderF is in popup mode. The value is a list [`line`, `col`], the
-    first line and the first column are both 1.
+    window when LeaderF is in popup mode. `Popup mode` is when |g:Lf_WindowPosition|
+    is 'popup' or '--popup' is in the options list of `Leaderf` command.
+    The value is a list [`line`, `col`], the first line and the first column are
+    both 1.
     If the value of `line` is 0, the popup window or floating window vertically
     centered.
     If the value of `col` is 0, the popup window or floating window horizontally
@@ -683,10 +689,24 @@ g:Lf_PopupPosition                                 *g:Lf_PopupPosition*
 
     Default value is [0, 0].
 
-g:Lf_ShowPopupStatusline                           *g:Lf_ShowPopupStatusline*
+g:Lf_PopupShowStatusline                           *g:Lf_PopupShowStatusline*
     Specify whether to show the statusline when LeaderF is in popup mode.
+    `Popup mode` is when |g:Lf_WindowPosition| is 'popup' or '--popup' is in the
+    options list of `Leaderf` command.
 
     Default value is 1.
+
+g:Lf_PopupPreviewPosition                          *g:Lf_PopupPreviewPosition*
+    Specify where to locate the preview window when LeaderF is in popup mode.
+    `Popup mode` is when |g:Lf_WindowPosition| is 'popup' or '--popup' is in the
+    options list of `Leaderf` command.
+    The value can be one of the following:
+    'top': the preview window is on the top of the main LeaderF window.
+    'bottom': the preview window is at the bottom of the main LeaderF window.
+    'cursor': the preview window is at the cursor position in the main LeaderF
+              window.
+
+    Default value is 'cursor'.
 
 ==============================================================================
 USAGE                                           *leaderf-usage*

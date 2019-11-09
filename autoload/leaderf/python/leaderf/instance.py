@@ -381,7 +381,7 @@ class LfInstance(object):
             lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Lf_hl_input_text')" % winid)
             self._popup_instance.input_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
 
-            if lfEval("get(g:, 'Lf_ShowPopupStatusline', 1)") == '1':
+            if lfEval("get(g:, 'Lf_PopupShowStatusline', 1)") == '1':
                 stl_win_config = {
                         "relative": "editor",
                         "anchor"  : "NW",
@@ -424,9 +424,6 @@ class LfInstance(object):
                     "padding":         [0, 0, 0, 1],
                     "scrollbar":       0,
                     "mapping":         0,
-                    # "border":          [0, 1, 0, 0],
-                    # "borderchars":     [' '],
-                    # "borderhighlight": ["Lf_hl_previewTitle"],
                     "filter":          "leaderf#PopupFilter",
                     }
 
@@ -487,7 +484,7 @@ class LfInstance(object):
 
             self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage, line)
 
-            if lfEval("get(g:, 'Lf_ShowPopupStatusline', 1)") == '1':
+            if lfEval("get(g:, 'Lf_PopupShowStatusline', 1)") == '1':
                 statusline_win_options = {
                         "maxwidth":        maxwidth,
                         "minwidth":        maxwidth,
@@ -794,7 +791,7 @@ class LfInstance(object):
 
     def _actualLength(self, buffer):
         num = 0
-        columns = int(lfEval("&columns"))
+        columns = self._window_object.width - 1
         for i in buffer:
             num += (int(lfEval("strdisplaywidth('%s')" % escQuote(i))) + columns - 1)// columns
         return num

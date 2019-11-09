@@ -377,9 +377,7 @@ class Manager(object):
 
     #**************************************************************
 
-    def _createPopupPreview(self, title, buf_number, line_nr, filter_cb="leaderf#previewFilter"):
-        buf_number = int(buf_number)
-        line_nr = int(line_nr)
+    def _createPopupModePreview(self, title, buf_number, line_nr, filter_cb="leaderf#previewFilter"):
         if lfEval("has('nvim')") == '1':
             width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
             if width == 0:
@@ -428,12 +426,145 @@ class Manager(object):
             if buffer_len >= line_nr > 0:
                 lfCmd("""call nvim_win_set_cursor(%d, [%d, 1])""" % (self._preview_winid, line_nr))
         else:
-            pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
-            if pos.lower() == 'center':
+            popup_window = self._getInstance().window
+            popup_pos = lfEval("popup_getpos(%d)" % popup_window.id)
+
+            width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
+            if width == 0:
+                maxwidth = int(lfEval("&columns"))//2 - 1
+            else:
+                maxwidth = min(width, int(lfEval("&columns")))
+
+            preview_pos = lfEval("get(g:, 'Lf_PopupPreviewPosition', 'cursor')")
+            if preview_pos.lower() == 'bottom':
+                maxwidth = int(popup_pos["width"]) - 1 # there is one column of padding on the left
+                col = int(popup_pos["col"])
+                if self._getInstance().getPopupInstance().statusline_win:
+                    statusline_height = 1
+                else:
+                    statusline_height = 0
+                line = int(popup_pos["line"]) + int(popup_pos["height"]) + statusline_height
+                pos = "topleft"
+                maxheight = int(lfEval("&lines")) - line - 2
+            elif preview_pos.lower() == 'top':
+                maxwidth = int(popup_pos["width"]) - 1 # there is one column of padding on the left
+                col = int(popup_pos["col"])
+                # int(popup_pos["core_line"]) - 1(exclude the first line) - 1(input window) - 1(title)
+                maxheight = int(popup_pos["line"]) - 3
+                pos = "botleft"
+                line = maxheight + 1
+            else: # cursor
+                lfCmd("""call win_execute(%d, "let numberwidth = &numberwidth")""" % popup_window.id)
+                col = int(popup_pos["core_col"]) + int(lfEval("numberwidth")) + popup_window.cursor[1]
+
+                lfCmd("""call win_execute(%d, "let delta_height = line('.') - line('w0')")""" % popup_window.id)
+                # the line of buffer starts from 0, while the line of line() starts from 1
+                start = int(lfEval("line('w0', %d)" % popup_window.id)) - 1
+                end = int(lfEval("line('.', %d)" % popup_window.id)) - 1
+                col_width = int(popup_pos["core_width"]) - int(lfEval("numberwidth"))
+                delta_height = lfActualLineCount(self._getInstance().buffer, start, end, col_width)
+                # int(popup_pos["core_line"]) - 1(exclude the first line) - 1(input window)
+                maxheight = int(popup_pos["core_line"]) + delta_height - 2
+                pos = "botleft"
+                line = maxheight + 1
+
+            options = {
+                    "title":           title,
+                    "cursorline":      1,
+                    "maxwidth":        maxwidth,
+                    "minwidth":        maxwidth,
+                    "maxheight":       maxheight,
+                    "minheight":       maxheight,
+                    "zindex":          20481,
+                    "pos":             pos,
+                    "line":            line,
+                    "col":             col,
+                    "padding":         [0, 0, 0, 1],
+                    "border":          [1, 0, 0, 0],
+                    "borderchars":     [' '],
+                    "borderhighlight": ["Lf_hl_previewTitle"],
+                    "filter":          filter_cb,
+                    }
+
+            if preview_pos.lower() == 'bottom':
+                del options["title"]
+                options["border"] = [0, 0, 1, 0]
+            elif preview_pos.lower() == 'cursor' and maxheight < int(lfEval("&lines"))//2 - 2:
+                maxheight = int(lfEval("&lines")) - maxheight - 5
+                del options["title"]
+                options["border"] = [0, 0, 1, 0]
+                options["maxheight"] = maxheight
+                options["minheight"] = maxheight
+
+            lfCmd("silent! let winid = popup_create(%d, %s)" % (buf_number, str(options)))
+            self._preview_winid = int(lfEval("winid"))
+            lfCmd("call win_execute(%d, 'setlocal number norelativenumber noswapfile')" % self._preview_winid)
+            if line_nr > 0:
+                lfCmd("""call win_execute(%d, "exec 'norm! %dGzz' | redraw")""" % (self._preview_winid, line_nr))
+
+    def _createPopupPreview(self, title, buf_number, line_nr, filter_cb="leaderf#previewFilter"):
+        buf_number = int(buf_number)
+        line_nr = int(line_nr)
+
+        if self._getInstance().getWinPos() == 'popup':
+            self._createPopupModePreview(title, buf_number, line_nr, filter_cb)
+            return
+
+        if lfEval("has('nvim')") == '1':
+            width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
+            if width == 0:
+                width = int(lfEval("&columns"))//2
+            else:
+                width = min(width, int(lfEval("&columns")))
+            maxheight = int(lfEval("&lines - (line('w$') - line('.')) - 3"))
+            maxheight -= int(self._getInstance().window.height) - int(lfEval("(line('w$') - line('w0') + 1)"))
+            relative = 'editor'
+            anchor = "SW"
+            row = maxheight
+            lfCmd("call bufload(%d)" % buf_number)
+            buffer_len = len(vim.buffers[buf_number])
+            height = min(maxheight, buffer_len)
+            preview_pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
+            if preview_pos.lower() == 'center':
+                col = (int(lfEval("&columns")) - width) // 2
+            elif preview_pos.lower() == 'left':
                 col = 0
-            elif pos.lower() == 'left':
+            elif preview_pos.lower() == 'right':
+                col = int(lfEval("&columns")) - width
+            else:
+                relative = 'cursor'
+                row = 0
+                col = 0
+
+            if maxheight < int(lfEval("&lines"))//2 - 2:
+                anchor = "NW"
+                if relative == 'cursor':
+                    row = 1
+                else:
+                    row = maxheight + 1
+                height = min(int(lfEval("&lines")) - maxheight - 3, buffer_len)
+
+            config = {
+                    "relative": relative,
+                    "anchor"  : anchor,
+                    "height"  : height,
+                    "width"   : width,
+                    "row"     : row,
+                    "col"     : col
+                    }
+            self._preview_winid = int(lfEval("nvim_open_win(%d, 0, %s)" % (buf_number, str(config))))
+            lfCmd("call nvim_win_set_option(%d, 'number', v:true)" % self._preview_winid)
+            lfCmd("call nvim_win_set_option(%d, 'cursorline', v:true)" % self._preview_winid)
+            lfCmd("call nvim_buf_set_option(%d, 'swapfile', v:false)" % buf_number)
+            if buffer_len >= line_nr > 0:
+                lfCmd("""call nvim_win_set_cursor(%d, [%d, 1])""" % (self._preview_winid, line_nr))
+        else:
+            preview_pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
+            if preview_pos.lower() == 'center':
+                col = 0
+            elif preview_pos.lower() == 'left':
                 col = 1
-            elif pos.lower() == 'right':
+            elif preview_pos.lower() == 'right':
                 col = int(lfEval("&columns"))//2 + 2
             else:
                 col = "cursor"
@@ -470,7 +601,7 @@ class Manager(object):
 
             lfCmd("silent! let winid = popup_create(%d, %s)" % (buf_number, str(options)))
             self._preview_winid = int(lfEval("winid"))
-            lfCmd("call win_execute(%d, 'setlocal number norelativenumber')" % self._preview_winid)
+            lfCmd("call win_execute(%d, 'setlocal number norelativenumber noswapfile')" % self._preview_winid)
             if line_nr > 0:
                 lfCmd("""call win_execute(%d, "exec 'norm! %dGzz' | redraw")""" % (self._preview_winid, line_nr))
 
