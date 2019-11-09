@@ -304,13 +304,13 @@ class LfInstance(object):
         buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
 
         width = int(lfEval("get(g:, 'Lf_PopupWidth', 0)"))
-        if width == 0:
+        if width <= 0:
             maxwidth = int(int(lfEval("&columns")) * 2 // 3)
         else:
             maxwidth = min(width, int(lfEval("&columns")))
 
         height = int(lfEval("get(g:, 'Lf_PopupHeight', 0)"))
-        if height == 0:
+        if height <= 0:
             maxheight = int(int(lfEval("&lines")) * 0.4)
         else:
             maxheight = min(height, int(lfEval("&lines")))

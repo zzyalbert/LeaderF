@@ -101,6 +101,7 @@ optional arguments:
   --belowright          the LeaderF window is at the belowright of the screen
   --aboveleft           the LeaderF window is at the aboveleft of the screen
   --fullScreen          the LeaderF window takes up the full screen
+  --popup               the LeaderF window is a popup window or floating window
   --nameOnly            LeaderF is in NameOnly mode by default
   --fullPath            LeaderF is in FullPath mode by default
   --fuzzy               LeaderF is in Fuzzy mode by default
@@ -239,6 +240,7 @@ common arguments:
   --belowright          the LeaderF window is at the belowright of the screen
   --aboveleft           the LeaderF window is at the aboveleft of the screen
   --fullScreen          the LeaderF window takes up the full screen
+  --popup               the LeaderF window is a popup window or floating window
   --nameOnly            LeaderF is in NameOnly mode by default
   --fullPath            LeaderF is in FullPath mode by default
   --fuzzy               LeaderF is in Fuzzy mode by default

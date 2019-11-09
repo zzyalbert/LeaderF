@@ -63,6 +63,7 @@ g:Lf_WindowPosition                             *g:Lf_WindowPosition*
     'bottom' - the LeaderF window is at the bottom of the screen.
     'left' - the LeaderF window is at the left of the screen.
     'right' - the LeaderF window is at the right of the screen.
+    'popup' - the LeaderF window is a popup window or floating window.
     Default value is 'bottom'.
 
 g:Lf_WindowHeight                               *g:Lf_WindowHeight*
@@ -656,6 +657,36 @@ g:Lf_DiscardEmptyBuffer                           *g:Lf_DiscardEmptyBuffer*
     with <C-T>.
 
     Default value is 0.
+
+g:Lf_PopupWidth                                   *g:Lf_PopupWidth*
+    Specify the width of the popup window or floating window when LeaderF is
+    in popup mode. The value should be a non-negative integer. If the value is
+    0, the width is 2/3 of the screen's width.
+
+    Default value is 0.
+
+g:Lf_PopupHeight                                   *g:Lf_PopupHeight*
+    Specify the height of the popup window or floating window when LeaderF is
+    in popup mode. The value should be a non-negative integer. If the value is
+    0, the height is 40% of the screen's height.
+
+    Default value is 0.
+
+g:Lf_PopupPosition                                 *g:Lf_PopupPosition*
+    Specify the coordinate of the topleft corner of popup window or floating
+    window when LeaderF is in popup mode. The value is a list [`line`, `col`], the
+    first line and the first column are both 1.
+    If the value of `line` is 0, the popup window or floating window vertically
+    centered.
+    If the value of `col` is 0, the popup window or floating window horizontally
+    centered.
+
+    Default value is [0, 0].
+
+g:Lf_ShowPopupStatusline                           *g:Lf_ShowPopupStatusline*
+    Specify whether to show the statusline when LeaderF is in popup mode.
+
+    Default value is 1.
 
 ==============================================================================
 USAGE                                           *leaderf-usage*
