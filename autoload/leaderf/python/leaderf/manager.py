@@ -389,7 +389,7 @@ class Manager(object):
             relative = 'editor'
             anchor = "SW"
             row = maxheight
-            lfCmd("call bufload(%d)" % buf_number)
+            lfCmd("silent! call bufload(%d)" % buf_number)
             buffer_len = len(vim.buffers[buf_number])
             height = min(maxheight, buffer_len)
             pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
@@ -446,11 +446,22 @@ class Manager(object):
                 line = int(popup_pos["line"]) + int(popup_pos["height"]) + statusline_height
                 pos = "topleft"
                 maxheight = int(lfEval("&lines")) - line - 2
+
+                lfCmd("silent! call bufload(%d)" % buf_number)
+                buffer_len = len(vim.buffers[buf_number])
+                if buffer_len >= maxheight: # scrollbar appear
+                    maxwidth -= 1
             elif preview_pos.lower() == 'top':
                 maxwidth = int(popup_pos["width"]) - 1 # there is one column of padding on the left
                 col = int(popup_pos["col"])
                 # int(popup_pos["core_line"]) - 1(exclude the first line) - 1(input window) - 1(title)
                 maxheight = int(popup_pos["line"]) - 3
+
+                lfCmd("silent! call bufload(%d)" % buf_number)
+                buffer_len = len(vim.buffers[buf_number])
+                if buffer_len >= maxheight: # scrollbar appear
+                    maxwidth -= 1
+
                 pos = "botleft"
                 line = maxheight + 1
             else: # cursor
@@ -521,7 +532,7 @@ class Manager(object):
             relative = 'editor'
             anchor = "SW"
             row = maxheight
-            lfCmd("call bufload(%d)" % buf_number)
+            lfCmd("silent! call bufload(%d)" % buf_number)
             buffer_len = len(vim.buffers[buf_number])
             height = min(maxheight, buffer_len)
             preview_pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
