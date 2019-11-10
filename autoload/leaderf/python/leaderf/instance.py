@@ -644,7 +644,7 @@ class LfInstance(object):
         else:
             self._reverse_order = False
 
-        if "--popup" in self._arguments: # popup does not support reverse order
+        if "--popup" in self._arguments or lfEval("g:Lf_WindowPosition") == 'popup': # popup does not support reverse order
             self._reverse_order = False
 
     def ignoreReverse(self):
