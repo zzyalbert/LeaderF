@@ -301,7 +301,7 @@ class LfInstance(object):
             else:
                 self._popup_instance.close()
 
-        buf_number = int(lfEval("bufnr('{}', 1)".format(self._buffer_name)))
+        buf_number = int(lfEval("bufadd('{}')".format(escQuote(self._buffer_name))))
 
         width = int(lfEval("get(g:, 'Lf_PopupWidth', 0)"))
         if width <= 0:

@@ -1128,7 +1128,7 @@ class GtagsExplManager(Manager):
             file = os.path.join(self._getInstance().getCwd(), lfDecode(file))
             file = os.path.normpath(lfEncode(file))
 
-        buf_number = lfEval("bufnr('{}', 1)".format(file))
+        buf_number = lfEval("bufadd('{}')".format(escQuote(file)))
         self._createPopupPreview("", buf_number, line_num)
 
 

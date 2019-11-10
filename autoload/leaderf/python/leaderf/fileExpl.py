@@ -730,7 +730,7 @@ class FileExplManager(Manager):
 
     def _previewInPopup(self, *args, **kwargs):
         line = args[0]
-        buf_number = lfEval("bufnr('{}', 1)".format(line))
+        buf_number = lfEval("bufadd('{}')".format(escQuote(line)))
         self._createPopupPreview(line, buf_number, 0)
 
 
