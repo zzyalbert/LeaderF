@@ -441,11 +441,11 @@ class RgExplManager(Manager):
         try:
             if buf_number == -1:
                 if kwargs.get("mode", '') == 't':
-                    lfCmd("tab drop %s | %s" % (escSpecial(file), line_num))
+                    lfCmd("silent tab drop %s | %s" % (escSpecial(file), line_num))
                 else:
-                    lfCmd("hide edit +%s %s" % (line_num, escSpecial(file)))
+                    lfCmd("silent hide edit +%s %s" % (line_num, escSpecial(file)))
             else:
-                lfCmd("hide buffer +%s %s" % (line_num, buf_number))
+                lfCmd("silent hide buffer +%s %s" % (line_num, buf_number))
             lfCmd("norm! zz")
 
             if vim.current.window not in self._cursorline_dict:
