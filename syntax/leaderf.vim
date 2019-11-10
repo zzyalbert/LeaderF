@@ -51,15 +51,6 @@ if has("syntax")
         highlight def Lf_hl_match4 gui=bold guifg=#F70505 cterm=bold ctermfg=196
         highlight def Lf_hl_matchRefine  gui=bold guifg=Magenta cterm=bold ctermfg=201
     endif
-    silent! call prop_type_add('Lf_hl_cursor', {'highlight': 'Lf_hl_cursor', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_prompt', {'highlight': 'Lf_hl_prompt', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_match',  {'highlight': 'Lf_hl_match' , 'priority': 20})
-    silent! call prop_type_add('Lf_hl_match0', {'highlight': 'Lf_hl_match0', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_match1', {'highlight': 'Lf_hl_match1', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_match2', {'highlight': 'Lf_hl_match2', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_match3', {'highlight': 'Lf_hl_match3', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_match4', {'highlight': 'Lf_hl_match4', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_matchRefine', {'highlight': 'Lf_hl_matchRefine', 'priority': 20})
     highlight def link Lf_hl_bufNumber          Constant
     highlight def link Lf_hl_bufIndicators      Statement
     highlight def link Lf_hl_bufModified        String

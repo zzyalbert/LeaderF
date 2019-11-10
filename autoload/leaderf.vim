@@ -421,6 +421,7 @@ function! leaderf#ResetPopupOptions(winid, option, value) abort
     let opts[a:option] = a:value
     call popup_setoptions(a:winid, opts)
 endfunction
+
 " `pos` - A list with three numbers, e.g., [23, 11, 3]. As above, but
 " the third number gives the length of the highlight in bytes.
 function! leaderf#matchaddpos(group, pos) abort
