@@ -942,13 +942,13 @@ class LfInstance(object):
                         self.setStlRunning(True)
                     self.setStlTotal(len(cur_content)//unit)
                     self.setStlResultsCount(len(cur_content)//unit)
-                    if self._win_pos != 'popup':
+                    if self._win_pos not in ('popup', 'floatwin'):
                         lfCmd("redrawstatus")
             self.setBuffer(cur_content, need_copy=True)
             self.setStlTotal(len(self._buffer_object)//unit)
             self.setStlRunning(False)
             self.setStlResultsCount(len(self._buffer_object)//unit, True)
-            if self._win_pos != 'popup':
+            if self._win_pos not in ('popup', 'floatwin'):
                 lfCmd("redrawstatus")
             set_content(cur_content)
         except vim.error: # neovim <C-C>
