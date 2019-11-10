@@ -207,6 +207,9 @@ class MruExplManager(Manager):
                         % self._getInstance().getPopupWinId())
                 id = int(lfEval("matchid"))
                 self._match_ids.append(id)
+            else:
+                id = int(lfEval('''matchadd('Lf_hl_bufDirname', ' \zs".*"$')'''))
+                self._match_ids.append(id)
 
     def _beforeExit(self):
         super(MruExplManager, self)._beforeExit()
