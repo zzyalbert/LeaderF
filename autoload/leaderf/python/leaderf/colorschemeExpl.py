@@ -28,7 +28,7 @@ class ColorschemeExplorer(Explorer):
         return content
 
     def getStlCategory(self):
-        return "Colors"
+        return "Colorscheme"
 
     def getStlCurDir(self):
         return escQuote(lfEncode(os.getcwd()))
