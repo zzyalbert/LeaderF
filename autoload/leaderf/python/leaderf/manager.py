@@ -243,7 +243,10 @@ class Manager(object):
             id = int(lfEval("matchadd('Lf_hl_cursorline', '.*\%#.*', 9)"))
             self._match_ids.append(id)
         else:
-            lfCmd("call win_execute({}, 'syn match Lf_hl_cursorline /.*\%#.*/')".format(self._getInstance().getPopupWinId()))
+            lfCmd("""call win_execute({}, 'let matchid = matchadd(''Lf_hl_cursorline'', ''.*\%#.*'', 9)')"""
+                    .format(self._getInstance().getPopupWinId()))
+            id = int(lfEval("matchid"))
+            self._match_ids.append(id)
 
         if is_fuzzyEngine_C:
             self._fuzzy_engine = fuzzyEngine.createFuzzyEngine(cpu_count, False)
@@ -266,7 +269,6 @@ class Manager(object):
         if self._getInstance().getWinPos() == 'popup':
             for i in self._match_ids:
                 lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
-            lfCmd("call win_execute({}, 'syn clear Lf_hl_cursorline')".format(self._getInstance().getPopupWinId()))
         else:
             for i in self._match_ids:
                 lfCmd("silent! call matchdelete(%d)" % i)
@@ -1279,10 +1281,11 @@ class Manager(object):
             highlight_method(hl_group='Lf_hl_match' + str(i % 5))
 
     def _clearHighlights(self):
-        for i in self._highlight_ids:
-            if self._getInstance().getWinPos() == 'popup':
+        if self._getInstance().getWinPos() == 'popup':
+            for i in self._highlight_ids:
                 lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
-            else:
+        else:
+            for i in self._highlight_ids:
                 lfCmd("silent! call matchdelete(%d)" % i)
         self._highlight_ids = []
 
