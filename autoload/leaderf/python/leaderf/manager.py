@@ -266,6 +266,7 @@ class Manager(object):
         if self._getInstance().getWinPos() == 'popup':
             for i in self._match_ids:
                 lfCmd("silent! call matchdelete(%d, %d)" % (i, self._getInstance().getPopupWinId()))
+            lfCmd("call win_execute({}, 'syn clear Lf_hl_cursorline')".format(self._getInstance().getPopupWinId()))
         else:
             for i in self._match_ids:
                 lfCmd("silent! call matchdelete(%d)" % i)
