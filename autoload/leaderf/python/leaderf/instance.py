@@ -262,6 +262,7 @@ class LfInstance(object):
         lfCmd("setlocal foldmethod=manual")
         lfCmd("setlocal shiftwidth=4")
         lfCmd("setlocal cursorline")
+        lfCmd("setlocal signcolumn=no")
         if self._reverse_order:
             lfCmd("setlocal nonumber")
             lfCmd("setlocal foldcolumn=1")
@@ -346,6 +347,7 @@ class LfInstance(object):
             lfCmd("silent let winid = nvim_open_win(%d, 1, %s)" % (buf_number, str(config)))
             self._popup_winid = int(lfEval("winid"))
             self._setAttributes()
+            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 1)" % self._popup_winid)
 
             self._tabpage_object = vim.current.tabpage
             self._buffer_object = vim.buffers[buf_number]
@@ -377,6 +379,7 @@ class LfInstance(object):
             lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 0)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'signcolumn', 'no')" % winid)
             lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Lf_hl_input_text')" % winid)
             self._popup_instance.input_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
@@ -407,6 +410,7 @@ class LfInstance(object):
                 lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
                 lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
                 lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 0)" % winid)
+                lfCmd("call nvim_win_set_option(%d, 'signcolumn', 'no')" % winid)
                 lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
                 lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Statusline')" % winid)
                 self._popup_instance.statusline_win = FloatWindow(winid, vim.windows[int(lfEval("win_id2win(%d)" % winid))-1], vim.buffers[buf_number], vim.current.tabpage)
@@ -442,6 +446,7 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'setlocal cursorline')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % self._popup_winid)
+            lfCmd("call win_execute(%d, 'setlocal signcolumn=no')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % self._popup_winid)
             lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_popup_window')" % self._popup_winid)
 
@@ -479,6 +484,7 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % winid)
             lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
             lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
+            lfCmd("call win_execute(%d, 'setlocal signcolumn=no')" % winid)
             lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_input_text')" % winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
@@ -514,6 +520,7 @@ class LfInstance(object):
                 lfCmd("call win_execute(%d, 'setlocal shiftwidth=4')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal signcolumn=no')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 

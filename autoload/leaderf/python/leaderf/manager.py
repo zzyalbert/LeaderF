@@ -381,36 +381,42 @@ class Manager(object):
         if lfEval("has('nvim')") == '1':
             width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
             if width == 0:
-                width = int(lfEval("&columns"))//2
+                maxwidth = int(lfEval("&columns"))//2
             else:
-                width = min(width, int(lfEval("&columns")))
-            maxheight = int(lfEval("&lines - (line('w$') - line('.')) - 3"))
-            maxheight -= int(self._getInstance().window.height) - int(lfEval("(line('w$') - line('w0') + 1)"))
+                maxwidth = min(width, int(lfEval("&columns")))
             relative = 'editor'
-            anchor = "SW"
-            row = maxheight
             lfCmd("silent! call bufload(%d)" % buf_number)
             buffer_len = len(vim.buffers[buf_number])
-            height = min(maxheight, buffer_len)
-            pos = lfEval("get(g:, 'Lf_PreviewHorizontalPosition', 'cursor')")
-            if pos.lower() == 'center':
-                col = (int(lfEval("&columns")) - width) // 2
-            elif pos.lower() == 'left':
-                col = 0
-            elif pos.lower() == 'right':
-                col = int(lfEval("&columns")) - width
-            else:
-                relative = 'cursor'
-                row = 0
-                col = 0
-
-            if maxheight < int(lfEval("&lines"))//2 - 2:
+            float_window = self._getInstance().window
+            float_win_pos = lfEval("nvim_win_get_position(%d)" % float_window.id)
+            float_win_row, float_win_col = [int(i) for i in float_win_pos]
+            preview_pos = lfEval("get(g:, 'Lf_PopupPreviewPosition', 'cursor')")
+            if preview_pos.lower() == 'bottom':
                 anchor = "NW"
-                if relative == 'cursor':
-                    row = 1
+                if self._getInstance().getPopupInstance().statusline_win:
+                    statusline_height = 1
                 else:
-                    row = maxheight + 1
-                height = min(int(lfEval("&lines")) - maxheight - 3, buffer_len)
+                    statusline_height = 0
+                row = float_win_row + float_window.height + statusline_height
+                col = float_win_col
+                height = int(lfEval("&lines")) - row - 2
+                width = float_window.width
+            elif preview_pos.lower() == 'top':
+                anchor = "SW"
+                row = float_win_row - 1
+                col = float_win_col
+                height = row
+                width = float_window.width
+            else:
+                anchor = "SW"
+                start = int(lfEval("line('w0')")) - 1
+                end = int(lfEval("line('.')")) - 1
+                col_width = float_window.width - int(lfEval("&numberwidth")) - 1
+                delta_height = lfActualLineCount(self._getInstance().buffer, start, end, col_width)
+                row = float_win_row + delta_height
+                col = float_win_col + int(lfEval("&numberwidth")) + 1 + float_window.cursor[1]
+                height = row
+                width = maxwidth
 
             config = {
                     "relative": relative,
@@ -425,6 +431,7 @@ class Manager(object):
             lfCmd("call nvim_win_set_option(%d, 'cursorline', v:true)" % self._preview_winid)
             if buffer_len >= line_nr > 0:
                 lfCmd("""call nvim_win_set_cursor(%d, [%d, 1])""" % (self._preview_winid, line_nr))
+            lfCmd("redraw!")
         else:
             popup_window = self._getInstance().window
             popup_pos = lfEval("popup_getpos(%d)" % popup_window.id)
@@ -517,7 +524,7 @@ class Manager(object):
         buf_number = int(buf_number)
         line_nr = int(line_nr)
 
-        if self._getInstance().getWinPos() == 'popup':
+        if self._getInstance().getWinPos() in ('popup', 'floatwin'):
             self._createPopupModePreview(title, buf_number, line_nr, filter_cb)
             return
 
