@@ -499,7 +499,7 @@ class LfInstance(object):
                         "maxheight":       1,
                         "zindex":          20480,
                         "pos":             "topleft",
-                        "line":            line + maxheight,
+                        "line":            line + 1 + self._window_object.height,
                         "col":             col,
                         "padding":         [0, 0, 0, 1],
                         "scrollbar":       0,
@@ -905,6 +905,7 @@ class LfInstance(object):
                 else:
                     self._buffer_object.append(content)
         finally:
+            self.refreshPopupStatusline()
             self.buffer.options['modifiable'] = False
 
     def clearBuffer(self):

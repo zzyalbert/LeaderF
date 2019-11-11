@@ -2143,7 +2143,7 @@ class Manager(object):
                         self._getInstance().appendBuffer(self._content[self._offset_in_content:cur_len])
                         self._offset_in_content = cur_len
 
-                    if time.time() - self._bang_start_time > 0.5:
+                    if self._getInstance().getWinPos() not in ('popup', 'floatwin') and time.time() - self._bang_start_time > 0.5:
                         self._bang_start_time = time.time()
                         lfCmd("echohl WarningMsg | redraw | echo ' searching %s' | echohl NONE" % ('.' * self._bang_count))
                         self._bang_count = (self._bang_count + 1) % 9
