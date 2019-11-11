@@ -186,7 +186,7 @@ class LfCli(object):
         part2 = "{}/{}".format(line_num, result_count)
         part3 = total
         flag = ('+', '×')
-        if lfEval("g:Lf_{}_StlRunning".format(self._instance._category)) == '1':
+        if lfEval("g:Lf_{}_IsRunning".format(self._instance._category)) == '1':
             status = " {} ".format(flag[self._running_status])
             self._running_status = (self._running_status + 1) & 1
         else:

@@ -231,6 +231,7 @@ class LfInstance(object):
             lfCmd("let g:Lf_{}_StlMode = '-'".format(self._category))
             lfCmd("let g:Lf_{}_StlCwd= '-'".format(self._category))
             lfCmd("let g:Lf_{}_StlRunning = ':'".format(self._category))
+            lfCmd("let g:Lf_{}_IsRunning = 0".format(self._category))
             lfCmd("let g:Lf_{}_StlTotal = '0'".format(self._category))
             lfCmd("let g:Lf_{}_StlLineNumber = '1'".format(self._category))
             lfCmd("let g:Lf_{}_StlResultsCount = '0'".format(self._category))
@@ -698,9 +699,9 @@ class LfInstance(object):
     def setStlRunning(self, running):
         if self._win_pos in ('popup', 'floatwin'):
             if running:
-                lfCmd("let g:Lf_{}_StlRunning = 1".format(self._category))
+                lfCmd("let g:Lf_{}_IsRunning = 1".format(self._category))
             else:
-                lfCmd("let g:Lf_{}_StlRunning = 0".format(self._category))
+                lfCmd("let g:Lf_{}_IsRunning = 0".format(self._category))
             return
 
         if running:
