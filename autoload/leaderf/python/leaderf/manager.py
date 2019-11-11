@@ -397,7 +397,7 @@ class Manager(object):
             float_window = self._getInstance().window
             float_win_pos = lfEval("nvim_win_get_position(%d)" % float_window.id)
             float_win_row, float_win_col = [int(i) for i in float_win_pos]
-            preview_pos = lfEval("get(g:, 'Lf_PopupPreviewPosition', 'cursor')")
+            preview_pos = lfEval("get(g:, 'Lf_PopupPreviewPosition', 'top')")
             if preview_pos.lower() == 'bottom':
                 anchor = "NW"
                 if self._getInstance().getPopupInstance().statusline_win:
@@ -449,7 +449,7 @@ class Manager(object):
             else:
                 maxwidth = min(width, int(lfEval("&columns")))
 
-            preview_pos = lfEval("get(g:, 'Lf_PopupPreviewPosition', 'cursor')")
+            preview_pos = lfEval("get(g:, 'Lf_PopupPreviewPosition', 'top')")
             if preview_pos.lower() == 'bottom':
                 maxwidth = int(popup_pos["width"]) - 1 # there is one column of padding on the left
                 col = int(popup_pos["col"])

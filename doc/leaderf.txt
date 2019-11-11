@@ -706,7 +706,7 @@ g:Lf_PopupPreviewPosition                          *g:Lf_PopupPreviewPosition*
     'cursor': the preview window is at the cursor position in the main LeaderF
               window.
 
-    Default value is 'cursor'.
+    Default value is 'top'.
 
 ==============================================================================
 USAGE                                           *leaderf-usage*
