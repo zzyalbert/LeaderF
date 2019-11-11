@@ -622,7 +622,12 @@ class RgExplManager(Manager):
                 instance.window.cursor = (min(instance.cursorRow, len(instance.buffer)), 0)
             else:
                 instance.window.cursor = (max(instance.cursorRow - instance.helpLength, 1), 0)
-            instance.window.options["cursorline"] = True
+            if instance.getWinPos() == 'popup':
+                lfCmd("call win_execute(%d, 'setlocal cursorline')" % instance.getPopupWinId())
+            elif instance.getWinPos() == 'floatwin':
+                lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % instance.getPopupWinId())
+            else:
+                instance.window.options["cursorline"] = True
 
     def _nearestAncestor(self, markers, path):
         """

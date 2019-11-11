@@ -729,7 +729,7 @@ class LfInstance(object):
 
         self._before_enter()
 
-        if win_pos == 'popup':
+        if win_pos in ('popup', 'floatwin'):
             self._orig_win_nr = vim.current.window.number
             self._orig_win_id = lfWinId(self._orig_win_nr)
             self._createPopupWindow()
