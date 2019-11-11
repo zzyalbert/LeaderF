@@ -96,11 +96,13 @@ class PopupWindow(object):
 
     @property
     def height(self):
-        return int(lfEval("winheight(%d)" % self._winid))
+        popup_pos = lfEval("popup_getpos(%d)" % self._winid)
+        return int(popup_pos["height"])
 
     @property
     def width(self):
-        return int(lfEval("winwidth(%d)" % self._winid))
+        popup_pos = lfEval("popup_getpos(%d)" % self._winid)
+        return int(popup_pos["width"])
 
     @property
     def number(self):
@@ -378,7 +380,7 @@ class LfInstance(object):
             lfCmd("call nvim_win_set_option(%d, 'spell', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
-            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 0)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 1)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'signcolumn', 'no')" % winid)
             lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Lf_hl_input_text')" % winid)
