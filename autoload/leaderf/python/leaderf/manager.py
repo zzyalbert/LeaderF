@@ -281,6 +281,7 @@ class Manager(object):
         pass
 
     def _bangEnter(self):
+        self._current_mode = 'Normal'
         if self._getInstance().getWinPos() == 'popup':
             if lfEval("exists('*leaderf#%s#NormalModeFilter')" % self._getExplorer().getStlCategory()) == '1':
                 lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),
@@ -383,7 +384,7 @@ class Manager(object):
 
     #**************************************************************
 
-    def _createPopupModePreview(self, title, buf_number, line_nr, filter_cb="leaderf#previewFilter"):
+    def _createPopupModePreview(self, title, buf_number, line_nr):
         if lfEval("has('nvim')") == '1':
             width = int(lfEval("get(g:, 'Lf_PreviewPopupWidth', 0)"))
             if width == 0:
@@ -507,7 +508,7 @@ class Manager(object):
                     "border":          [1, 0, 0, 0],
                     "borderchars":     [' '],
                     "borderhighlight": ["Lf_hl_previewTitle"],
-                    "filter":          filter_cb,
+                    "filter":          "leaderf#popupModePreviewFilter",
                     }
 
             if preview_pos.lower() == 'bottom':
@@ -526,12 +527,12 @@ class Manager(object):
             if line_nr > 0:
                 lfCmd("""call win_execute(%d, "exec 'norm! %dGzz' | redraw")""" % (self._preview_winid, line_nr))
 
-    def _createPopupPreview(self, title, buf_number, line_nr, filter_cb="leaderf#previewFilter"):
+    def _createPopupPreview(self, title, buf_number, line_nr):
         buf_number = int(buf_number)
         line_nr = int(line_nr)
 
         if self._getInstance().getWinPos() in ('popup', 'floatwin'):
-            self._createPopupModePreview(title, buf_number, line_nr, filter_cb)
+            self._createPopupModePreview(title, buf_number, line_nr)
             return
 
         if lfEval("has('nvim')") == '1':
@@ -599,6 +600,12 @@ class Manager(object):
                 maxwidth = min(width, int(lfEval("&columns")))
             maxheight = int(lfEval("&lines - (line('w$') - line('.')) - 4"))
             maxheight -= int(self._getInstance().window.height) - int(lfEval("(line('w$') - line('w0') + 1)"))
+
+            if self._current_mode == 'Normal':
+                filter_cb = "leaderf#normalModePreviewFilter"
+            else:
+                filter_cb = "leaderf#popupModePreviewFilter"
+
             options = {
                     "title":           title,
                     "cursorline":      1,
@@ -819,14 +826,15 @@ class Manager(object):
         self._getInstance().setLineNumber()
 
     def _leftClick(self):
-        if self._getInstance().window.number == int(lfEval("v:mouse_win")):
-            if self._getInstance().getWinPos() == 'popup':
-                if int(lfEval("has('patch-8.1.2266')")) == 1:
+        if self._getInstance().getWinPos() == 'popup':
+            if int(lfEval("has('patch-8.1.2266')")) == 1:
+                if self._getInstance().getPopupWinId() == int(lfEval("v:mouse_winid")):
                     lfCmd("""call win_execute(%d, "exec v:mouse_lnum")""" % (self._getInstance().getPopupWinId()))
                     lfCmd("""call win_execute(%d, "exec 'norm!'.v:mouse_col.'|'")""" % (self._getInstance().getPopupWinId()))
-            else:
-                lfCmd("exec v:mouse_lnum")
-                lfCmd("exec 'norm!'.v:mouse_col.'|'")
+            exit_loop = False
+        elif self._getInstance().window.number == int(lfEval("v:mouse_win")):
+            lfCmd("exec v:mouse_lnum")
+            lfCmd("exec 'norm!'.v:mouse_col.'|'")
             self._getInstance().setLineNumber()
             self.clearSelections()
             exit_loop = False
@@ -2152,6 +2160,8 @@ class Manager(object):
 
     @modifiableController
     def input(self):
+        self._current_mode = 'Input'
+
         if self._getInstance().getWinPos() == 'popup':
             lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')"
                     % (self._getInstance().getPopupWinId(), 'leaderf#PopupFilter'))
@@ -2240,6 +2250,7 @@ class Manager(object):
                 self.quit()
                 break
             elif equal(cmd, '<Tab>'):   # switch to Normal mode
+                self._current_mode = 'Normal'
                 if self._getInstance().getWinPos() == 'popup':
                     if lfEval("exists('*leaderf#%s#NormalModeFilter')" % self._getExplorer().getStlCategory()) == '1':
                         lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),

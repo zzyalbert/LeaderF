@@ -325,15 +325,68 @@ function! leaderf#visual() abort
     endtry
 endfunction
 
-function! leaderf#previewFilter(winid, key) abort
-    if a:key == "\<ESC>"
+function! leaderf#popupModePreviewFilter(winid, key) abort
+    let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
+    if key ==? "<ESC>"
         call popup_close(a:winid)
         redraw
         return 1
-    elseif a:key == "\<CR>"
+    elseif key ==? "<CR>"
         call popup_close(a:winid)
         redraw
         return 0
+    elseif key ==? "<LeftMouse>" && has('patch-8.1.2266')
+        " v:mouse_winid is always 0 in popup window
+        " the below workaround can make v:mouse_winid have the value
+        silent! call feedkeys("\<LeftMouse>", "n")
+        silent! call getchar()
+
+        "echom v:mouse_winid v:mouse_lnum v:mouse_col v:mouse_win
+        " in normal window, v:mouse_lnum and v:mouse_col are always 0 after getchar()
+        if v:mouse_winid == a:winid
+            call win_execute(a:winid, "exec v:mouse_lnum")
+            call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
+            redraw
+            return 1
+        else
+            call popup_close(a:winid)
+            call win_execute(v:mouse_winid, "exec v:mouse_lnum")
+            call win_execute(v:mouse_winid, "exec 'norm!'.v:mouse_col.'|'")
+            redraw
+            return 1
+        endif
+    elseif key ==? "<ScrollWheelUp>"
+        call win_execute(a:winid, "norm! 3k")
+        redraw
+        return 1
+    elseif key ==? "<ScrollWheelDown>"
+        call win_execute(a:winid, "norm! 3j")
+        redraw
+        return 1
+    endif
+    return 0
+endfunction
+
+function! leaderf#normalModePreviewFilter(winid, key) abort
+    let key = get(g:Lf_KeyDict, get(g:Lf_KeyMap, a:key, a:key), a:key)
+    if key ==? "<ESC>"
+        call popup_close(a:winid)
+        redraw
+        return 1
+    elseif key ==? "<CR>"
+        call popup_close(a:winid)
+        redraw
+        return 0
+    elseif key ==? "<LeftMouse>" && has('patch-8.1.2266')
+        return 0
+    elseif key ==? "<ScrollWheelUp>"
+        call win_execute(a:winid, "norm! 3k")
+        redraw
+        return 1
+    elseif key ==? "<ScrollWheelDown>"
+        call win_execute(a:winid, "norm! 3j")
+        redraw
+        return 1
     endif
     return 0
 endfunction

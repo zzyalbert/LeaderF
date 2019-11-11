@@ -34,6 +34,10 @@ class FloatWindow(object):
         return self._tabpage
 
     @property
+    def window(self):
+        return self._window
+
+    @property
     def cursor(self):
         return self._window.cursor
 
@@ -106,6 +110,8 @@ class PopupWindow(object):
 
     @property
     def number(self):
+        # popup window seems does no have a window number
+        # this always return 0
         return int(lfEval("win_id2win(%d)" % self._winid))
 
     @property
@@ -633,7 +639,10 @@ class LfInstance(object):
             and self._window_object and self._window_object.valid and self._window_object.number != 0 # the number may be 0 although PopupWindow is valid because of popup_hide()
             and self._window_object.buffer == self._buffer_object):
             vim.current.tabpage = self._tabpage_object
-            vim.current.window = self._window_object
+            if self._win_pos == 'floatwin':
+                vim.current.window = self._window_object.window
+            else:
+                vim.current.window = self._window_object
             self._after_enter()
             return True
         return False
