@@ -674,11 +674,11 @@ class LfInstance(object):
         if lfEval("has('nvim')") == '1':
             lfCmd("redrawstatus")
 
-        if self._win_pos == 'popup':
+        if self._win_pos in ('popup', 'floatwin'):
             self._cli._buildPopupPrompt()
 
     def setStlRunning(self, running):
-        if self._win_pos == 'popup':
+        if self._win_pos in ('popup', 'floatwin'):
             if running:
                 lfCmd("let g:Lf_{}_StlRunning = 1".format(self._category))
             else:
