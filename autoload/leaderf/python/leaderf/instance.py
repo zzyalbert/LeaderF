@@ -305,6 +305,13 @@ class LfInstance(object):
                 and isinstance(self._window_object, PopupWindow): # type is PopupWindow
             if self._window_object.tabpage == vim.current.tabpage:
                 if self._popup_winid > 0 and self._window_object.valid: # invalid if cleared by popup_clear()
+                    # clear the buffer first to avoid a flash
+                    if lfEval("g:Lf_RememberLastSearch") == '0' \
+                            and "--append" not in self._arguments \
+                            and "--recall" not in self._arguments:
+                        self.buffer.options['modifiable'] = True
+                        del self._buffer_object[:]
+
                     self._popup_instance.show()
                     return
             else:
