@@ -2092,7 +2092,7 @@ class Manager(object):
 
                     self._getInstance().setStlResultsCount(len(self._content))
 
-                if self._win_pos not in ('popup', 'floatwin'):
+                if self._getInstance().getWinPos() not in ('popup', 'floatwin'):
                     lfCmd("redrawstatus")
 
             if self._cli.pattern:
@@ -2121,7 +2121,7 @@ class Manager(object):
                 else:
                     self._getInstance().setStlResultsCount(cur_len)
 
-                if self._win_pos not in ('popup', 'floatwin'):
+                if self._getInstance().getWinPos() not in ('popup', 'floatwin'):
                     lfCmd("redrawstatus")
 
             if self._cli.pattern:
