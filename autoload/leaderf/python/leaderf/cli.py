@@ -3,6 +3,7 @@
 
 import vim
 import re
+import sys
 import time
 from datetime import datetime
 from datetime import timedelta
@@ -194,10 +195,14 @@ class LfCli(object):
             spin = ""
             self._running_status = 0
 
+        if sys.version_info < (3, 0):
+            input_win_width += 2 * (len(sep) - int(lfEval("strdisplaywidth('%s')" % escQuote(sep))))
         part3_start = input_win_width - 1 - len(part3) - 2
         sep2_start = part3_start - len(sep)
         part2_start = sep2_start - 2 - len(part2)
         sep1_start = part2_start - len(sep)
+        spin_start = sep1_start - 1 - len(spin)
+        part1_width = spin_start - 1
         text = "{:<{part1_width}} {} {:>{sep_width}} {:>{part2_width}} {:>{sep_width}} {:>{part3_width}} ".format(part1,
                                                                                spin,
                                                                                sep,
@@ -205,7 +210,7 @@ class LfCli(object):
                                                                                sep,
                                                                                part3,
                                                                                sep_width=len(sep),
-                                                                               part1_width=input_win_width-7-2*len(sep)-len(spin)-len(part2)-len(part3),
+                                                                               part1_width=part1_width,
                                                                                part2_width=len(part2),
                                                                                part3_width=len(part3))
         # print(text[sep2_start:], lfBytesLen(text[:sep2_start]), lfBytesLen(text[:part3_start]), text[part3_start:],lfBytesLen(sep))
