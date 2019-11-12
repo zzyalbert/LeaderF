@@ -336,10 +336,12 @@ function! leaderf#popupModePreviewFilter(winid, key) abort
         redraw
         return 0
     elseif key ==? "<LeftMouse>" && has('patch-8.1.2266')
-        " v:mouse_winid is always 0 in popup window
+        " v:mouse_winid is always 0 in popup window(fixed in vim 8.1.2292)
         " the below workaround can make v:mouse_winid have the value
-        silent! call feedkeys("\<LeftMouse>", "n")
-        silent! call getchar()
+        if v:mouse_winid == 0
+            silent! call feedkeys("\<LeftMouse>", "n")
+            silent! call getchar()
+        endif
 
         "echom v:mouse_winid v:mouse_lnum v:mouse_col v:mouse_win
         " in normal window, v:mouse_lnum and v:mouse_col are always 0 after getchar()
