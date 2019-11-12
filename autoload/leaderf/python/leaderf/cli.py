@@ -217,12 +217,16 @@ class LfCli(object):
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_cursor'})")""" % input_window.id)
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_cursor'})")""" % (input_window.id, len(prompt)+self._cursor_pos+1))
 
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlTotal'})")""" % (input_window.id, self._instance._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlTotal'})")"""
                     % (input_window.id, lfBytesLen(text[:part3_start]), len(part3) + 3, self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlSeparator5'})")""" % (input_window.id, self._instance._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlSeparator5'})")"""
                     % (input_window.id, lfBytesLen(text[:sep2_start]), lfBytesLen(sep), self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlLineInfo'})")""" % (input_window.id, self._instance._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlLineInfo'})")"""
                     % (input_window.id, lfBytesLen(text[:part2_start]), len(part2) + 2, self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlSeparator4'})")""" % (input_window.id, self._instance._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlSeparator4'})")"""
                     % (input_window.id, lfBytesLen(text[:sep1_start]), lfBytesLen(sep), self._instance._category))
             lfCmd("redraw")
