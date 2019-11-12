@@ -40,25 +40,32 @@ function! leaderf#Buffer#NormalModeFilter(winid, key) abort
 
     if key == "j" || key ==? "<Down>"
         call win_execute(a:winid, "norm! j")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
         redraw
     elseif key == "k" || key ==? "<Up>"
         call win_execute(a:winid, "norm! k")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
         redraw
     elseif key ==? "<PageUp>"
         call win_execute(a:winid, "norm! \<PageUp>")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
     elseif key ==? "<PageDown>"
         call win_execute(a:winid, "norm! \<PageDown>")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
     elseif key ==? "<LeftMouse>"
         if has('patch-8.1.2266')
             call win_execute(a:winid, "exec v:mouse_lnum")
             call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
             redraw
         endif
     elseif key ==? "<ScrollWheelUp>"
         call win_execute(a:winid, "norm! 3k")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
         redraw
     elseif key ==? "<ScrollWheelDown>"
         call win_execute(a:winid, "norm! 3j")
+        exec g:Lf_py "bufExplManager._cli._buildPopupPrompt()"
         redraw
     elseif key == "q" || key ==? "<ESC>"
         exec g:Lf_py "bufExplManager.quit()"

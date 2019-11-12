@@ -329,6 +329,9 @@ class Manager(object):
                 lfCmd("call popup_close(%d)" % self._preview_winid)
 
     def _previewResult(self, preview):
+        if self._getInstance().getWinPos() == 'floatwin':
+            self._cli._buildPopupPrompt()
+
         if int(lfEval("win_id2win(%d)" % self._preview_winid)) != vim.current.window.number:
             self._closePreviewPopup()
 
@@ -640,9 +643,9 @@ class Manager(object):
             preview:
                 if True, always preview the result no matter what `g:Lf_PreviewResult` is.
         """
-        preview_dict = lfEval("g:Lf_PreviewResult")
+        preview_dict = {k.lower(): v for k, v in lfEval("g:Lf_PreviewResult").items()}
         category = self._getExplorer().getStlCategory()
-        if not preview and int(preview_dict.get(category, 0)) == 0:
+        if not preview and int(preview_dict.get(category.lower(), 0)) == 0:
             return False
 
         if self._getInstance().isReverseOrder():
@@ -1551,7 +1554,14 @@ class Manager(object):
                 return
         else:
             if self._getInstance().window.cursor[0] <= self._help_length:
-                lfCmd("norm! j")
+                if self._getInstance().getWinPos() == 'popup':
+                    lfCmd("call win_execute({}, 'norm! j')".format(self._getInstance().getPopupWinId()))
+                else:
+                    lfCmd("norm! j")
+
+                if self._getInstance().getWinPos() in ('popup', 'floatwin'):
+                    self._cli._buildPopupPrompt()
+
                 return
 
         if self._getExplorer().getStlCategory() == "Rg" \
@@ -2256,6 +2266,7 @@ class Manager(object):
                     else:
                         lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', function('leaderf#NormalModeFilter', [%d]))"
                                 % (self._getInstance().getPopupWinId(), id(self)))
+
                 self._setResultContent()
                 self.clearSelections()
                 self._cli.hideCursor()
@@ -2265,6 +2276,10 @@ class Manager(object):
                         and len(self._highlight_pos) < (len(self._getInstance().buffer) - self._help_length) // self._getUnit() \
                         and len(self._highlight_pos) < int(lfEval("g:Lf_NumberOfHighlight")):
                     self._highlight_method()
+
+                if self._getInstance().getWinPos() in ('popup', 'floatwin'):
+                    self._cli._buildPopupPrompt()
+
                 break
             elif equal(cmd, '<F5>'):
                 self.refresh(False)

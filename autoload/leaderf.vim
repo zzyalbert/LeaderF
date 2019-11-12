@@ -404,30 +404,37 @@ function! leaderf#NormalModeFilter(id, winid, key) abort
 
     if key == "j" || key ==? "<Down>"
         call win_execute(a:winid, "norm! j")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
         redraw
         exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key == "k" || key ==? "<Up>"
         call win_execute(a:winid, "norm! k")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
         redraw
         exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key ==? "<PageUp>"
         call win_execute(a:winid, "norm! \<PageUp>")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
         exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key ==? "<PageDown>"
         call win_execute(a:winid, "norm! \<PageDown>")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
         exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
     elseif key ==? "<LeftMouse>"
         if has('patch-8.1.2266')
             call win_execute(a:winid, "exec v:mouse_lnum")
             call win_execute(a:winid, "exec 'norm!'.v:mouse_col.'|'")
+            exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
             redraw
             exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._previewResult(False)", a:id)
         endif
     elseif key ==? "<ScrollWheelUp>"
         call win_execute(a:winid, "norm! 3k")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
         redraw
     elseif key ==? "<ScrollWheelDown>"
         call win_execute(a:winid, "norm! 3j")
+        exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value._cli._buildPopupPrompt()", a:id)
         redraw
     elseif key == "q" || key ==? "<ESC>"
         exec g:Lf_py printf("ctypes.cast(%d, ctypes.py_object).value.quit()", a:id)

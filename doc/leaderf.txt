@@ -416,7 +416,9 @@ g:Lf_PreviewResult                              *g:Lf_PreviewResult*
             \ 'BufTag': 1,
             \ 'Function': 1,
             \ 'Line': 0,
-            \ 'Colorscheme': 0
+            \ 'Colorscheme': 0,
+            \ 'Rg': 0,
+            \ 'Gtags': 0
             \}
 <
     e.g., if you want to disable the preview of BufTag explorer: >
@@ -682,9 +684,9 @@ g:Lf_PopupPosition                                 *g:Lf_PopupPosition*
     is 'popup' or '--popup' is in the options list of `Leaderf` command.
     The value is a list [`line`, `col`], the first line and the first column are
     both 1.
-    If the value of `line` is 0, the popup window or floating window vertically
+    If the value of `line` is 0, the popup window or floating window is vertically
     centered.
-    If the value of `col` is 0, the popup window or floating window horizontally
+    If the value of `col` is 0, the popup window or floating window is horizontally
     centered.
 
     Default value is [0, 0].
