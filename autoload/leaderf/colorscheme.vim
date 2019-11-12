@@ -83,16 +83,19 @@ function! leaderf#colorscheme#highlight(category)
 
     let palette = copy(s:palette)
     for [name, dict] in items(palette)
-        let highlightCmd = printf("hi def Lf_hl_%s_%s", a:category, name)
+        let hi_group = printf("Lf_hl_%s_%s", a:category, name)
+        let highlightCmd = printf("hi def %s", hi_group)
         for [k, v] in items(dict)
             let highlightCmd .= printf(" %s=%s", k, v)
         endfor
         exec highlightCmd
+        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
 
     let palette.stlMode = palette[s:modeMap[g:Lf_DefaultMode]]
 
     for [sep, dict] in items(s:leftSep)
+        let hi_group = printf("Lf_hl_%s_%s", a:category, sep)
         let highlightCmd = printf("hi def Lf_hl_%s_%s", a:category, sep)
         let highlightCmd .= printf(" guifg=%s guibg=%s", palette[dict.left].guibg, palette[dict.right].guibg)
         let highlightCmd .= printf(" ctermfg=%s ctermbg=%s", palette[dict.left].ctermbg, palette[dict.right].ctermbg)
@@ -100,9 +103,11 @@ function! leaderf#colorscheme#highlight(category)
             let highlightCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
         endif
         exec highlightCmd
+        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
 
     for [sep, dict] in items(s:rightSep)
+        let hi_group = printf("Lf_hl_%s_%s", a:category, sep)
         let highlightCmd = printf("hi def Lf_hl_%s_%s", a:category, sep)
         let highlightCmd .= printf(" guifg=%s guibg=%s", palette[dict.right].guibg, palette[dict.left].guibg)
         let highlightCmd .= printf(" ctermfg=%s ctermbg=%s", palette[dict.right].ctermbg, palette[dict.left].ctermbg)
@@ -110,6 +115,7 @@ function! leaderf#colorscheme#highlight(category)
             let highlightCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
         endif
         exec highlightCmd
+        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
     redrawstatus
 endfunction

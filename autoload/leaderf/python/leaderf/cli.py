@@ -185,26 +185,46 @@ class LfCli(object):
         part1 = prompt + pattern
         part2 = "{}/{}".format(line_num, result_count)
         part3 = total
+        sep = lfEval("g:Lf_StlSeparator.right")
         flag = ('+', '×')
         if lfEval("g:Lf_{}_IsRunning".format(self._instance._category)) == '1':
-            status = " {} ".format(flag[self._running_status])
+            spin = "{}".format(flag[self._running_status])
             self._running_status = (self._running_status + 1) & 1
         else:
-            status = " "
+            spin = ""
             self._running_status = 0
-        text = "{:<{part1_width}} {:>{part2_width}}{}{:>{part3_width}} ".format(part1,
+
+        part3_start = input_win_width - 1 - len(part3) - 2
+        sep2_start = part3_start - len(sep)
+        part2_start = sep2_start - 2 - len(part2)
+        sep1_start = part2_start - len(sep)
+        text = "{:<{part1_width}} {} {:>{sep_width}} {:>{part2_width}} {:>{sep_width}} {:>{part3_width}} ".format(part1,
+                                                                               spin,
+                                                                               sep,
                                                                                part2,
-                                                                               status,
+                                                                               sep,
                                                                                part3,
-                                                                               part1_width=input_win_width-3-len(status)-len(part2)-len(part3),
+                                                                               sep_width=len(sep),
+                                                                               part1_width=input_win_width-7-2*len(sep)-len(spin)-len(part2)-len(part3),
                                                                                part2_width=len(part2),
                                                                                part3_width=len(part3))
+        # print(text[sep2_start:], lfBytesLen(text[:sep2_start]), lfBytesLen(text[:part3_start]), text[part3_start:],lfBytesLen(sep))
+        # print(text[part2_start:], lfBytesLen(text[:part2_start]), lfBytesLen(text[:sep1_start]), text[sep1_start:],lfBytesLen(sep))
         if self._instance.getWinPos() == 'popup':
             lfCmd("""call popup_settext(%d, '%s')""" % (input_window.id, escQuote(text)))
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_window.id)
             lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_window.id, len(prompt)))
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_cursor'})")""" % input_window.id)
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_cursor'})")""" % (input_window.id, len(prompt)+self._cursor_pos+1))
+
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlTotal'})")"""
+                    % (input_window.id, lfBytesLen(text[:part3_start]), len(part3) + 3, self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlSeparator5'})")"""
+                    % (input_window.id, lfBytesLen(text[:sep2_start]), lfBytesLen(sep), self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlLineInfo'})")"""
+                    % (input_window.id, lfBytesLen(text[:part2_start]), len(part2) + 2, self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlSeparator4'})")"""
+                    % (input_window.id, lfBytesLen(text[:sep1_start]), lfBytesLen(sep), self._instance._category))
             lfCmd("redraw")
         else:
             self._instance._popup_instance.input_win.buffer[0] = text
