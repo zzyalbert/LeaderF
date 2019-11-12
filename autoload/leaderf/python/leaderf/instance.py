@@ -869,6 +869,11 @@ class LfInstance(object):
                 self.setLineNumber()
             else:
                 self._buffer_object[:] = content
+
+                # I don't know how to minimize the steps to reproduce the issue,
+                # I believe there must be a bug in vim
+                if self._win_pos == 'popup':
+                    self._orig_pos[1].options["foldmethod"] = self._orig_pos[1].options["foldmethod"]
         finally:
             self.refreshPopupStatusline()
             self.buffer.options['modifiable'] = False
