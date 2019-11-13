@@ -238,7 +238,12 @@ class Manager(object):
             self._vim_file_autoloaded = True
 
         if "--nowrap" in self._arguments:
-            self._getInstance().window.options['wrap'] = False
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("call win_execute(%d, 'setlocal nowrap')" % self._getInstance().getPopupWinId())
+            elif self._getInstance().getWinPos() == 'floatwin':
+                lfCmd("call nvim_win_set_option(%d, 'wrap', v:false)" % self._getInstance().getPopupWinId())
+            else:
+                self._getInstance().window.options['wrap'] = False
 
         if self._getInstance().getWinPos() != 'popup':
             self._defineMaps()
