@@ -333,7 +333,8 @@ function! leaderf#popupModePreviewFilter(winid, key) abort
         return 1
     elseif key ==? "<CR>"
         call popup_close(a:winid)
-        redraw
+        " https://github.com/vim/vim/issues/5216
+        "redraw
         return 0
     elseif key ==? "<LeftMouse>" && has('patch-8.1.2266')
         " v:mouse_winid is always 0 in popup window(fixed in vim 8.1.2292)
@@ -377,7 +378,8 @@ function! leaderf#normalModePreviewFilter(winid, key) abort
         return 1
     elseif key ==? "<CR>"
         call popup_close(a:winid)
-        redraw
+        " https://github.com/vim/vim/issues/5216
+        "redraw
         return 0
     elseif key ==? "<LeftMouse>" && has('patch-8.1.2266')
         return 0
