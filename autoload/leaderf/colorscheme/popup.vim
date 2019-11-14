@@ -16,99 +16,101 @@ let s:matchModeMap = {
 
 let s:leftSep = {
             \   'sep0': {
-            \       'left': 'Lf_hl_popup_name',
-            \       'right': 'Lf_hl_popup_category'
+            \       'left': 'mode',
+            \       'right': 'category'
             \   },
             \   'sep1': {
-            \       'left': 'Lf_hl_popup_category',
-            \       'right': 'Lf_hl_popup_mode'
+            \       'left': 'category',
+            \       'right': 'matchMode'
             \   },
             \   'sep2': {
-            \       'left': 'Lf_hl_popup_mode',
-            \       'right': 'Lf_hl_popup_cwd'
+            \       'left': 'matchMode',
+            \       'right': 'cwd'
             \   },
             \   'sep3': {
-            \       'left': 'Lf_hl_popup_cwd',
-            \       'right': 'Lf_hl_popup_blank'
+            \       'left': 'cwd',
+            \       'right': 'blank'
             \   }
             \ }
 
 let s:rightSep = {
             \   'sep4': {
-            \       'left': 'Lf_hl_popup_blank',
-            \       'right': 'Lf_hl_popup_lineInfo'
+            \       'left': 'inputText',
+            \       'right': 'lineInfo'
             \   },
             \   'sep5': {
-            \       'left': 'Lf_hl_popup_lineInfo',
-            \       'right': 'Lf_hl_popup_total'
+            \       'left': 'lineInfo',
+            \       'right': 'total'
             \   }
             \ }
 
-function! leaderf#colorscheme#highlight(category)
-    try
-        let s:palette = g:leaderf#colorscheme#{g:Lf_StlColorscheme}#palette
-    catch /^Vim\%((\a\+)\)\=:E121/
-        try
-            let s:palette = g:leaderf#colorscheme#{g:colors_name}#palette
-        catch /^Vim\%((\a\+)\)\=:E121/
-            "echohl WarningMsg
-            "try
-            "    echo "Could not load colorscheme '".g:colors_name."', use 'default'."
-            "catch /^Vim\%((\a\+)\)\=:E121/
-            "    echo "Could not load colorscheme, use 'default'."
-            "    let g:colors_name = "default"
-            "endtry
-            "echohl None
+function! s:HighlightGroup(category, name) abort
+    if a:name == 'mode' || a:name == 'matchMode'
+        return printf("Lf_hl_popup_%s_%s", a:category, a:name)
+    else
+        return printf("Lf_hl_popup_%s", a:name)
+    endif
+endfunction
 
-            let s:palette = g:leaderf#colorscheme#default#palette
-        endtry
-    endtry
-
-    let palette = copy(s:palette)
-    for [name, dict] in items(palette)
-        let hi_group = printf("Lf_hl_%s_%s", a:category, name)
-        let highlightCmd = printf("hi def %s", hi_group)
-        for [k, v] in items(dict)
-            let highlightCmd .= printf(" %s=%s", k, v)
-        endfor
-        exec highlightCmd
-        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
-    endfor
-
-    let palette.stlMode = palette[s:modeMap[g:Lf_DefaultMode]]
-
+function! s:HighlightSeperator(category) abort
+    exec printf("highlight link Lf_hl_popup_%s_mode Lf_hl_popup_inputMode", a:category)
+    exec printf("highlight link Lf_hl_popup_%s_matchMode %s", a:category, s:matchModeMap[g:Lf_DefaultMode])
     for [sep, dict] in items(s:leftSep)
-        let hi_group = printf("Lf_hl_%s_%s", a:category, sep)
-        let highlightCmd = printf("hi def Lf_hl_%s_%s", a:category, sep)
-        let highlightCmd .= printf(" guifg=%s guibg=%s", palette[dict.left].guibg, palette[dict.right].guibg)
-        let highlightCmd .= printf(" ctermfg=%s ctermbg=%s", palette[dict.left].ctermbg, palette[dict.right].ctermbg)
+        let sid_left = synIDtrans(hlID(s:HighlightGroup(a:category, dict.left)))
+        let sid_right = synIDtrans(hlID(s:HighlightGroup(a:category, dict.right)))
+        let hiCmd = printf("hi Lf_hl_popup_%s_%s", a:category, sep)
+        let hiCmd .= printf(" guifg=%s guibg=%s", synIDattr(sid_left, "bg", "gui"), synIDattr(sid_right, "bg", "gui"))
+        let hiCmd .= printf(" ctermfg=%s ctermbg=%s", synIDattr(sid_left, "bg", "cterm"), synIDattr(sid_right, "bg", "cterm"))
         if get(g:Lf_StlSeparator, "font", "") != ""
-            let highlightCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
+            let hiCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
         endif
-        exec highlightCmd
-        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
+        exec hiCmd
+        "let hi_group = printf("Lf_hl_popup_%s_%s", a:category, sep)
+        "silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
 
     for [sep, dict] in items(s:rightSep)
-        let hi_group = printf("Lf_hl_%s_%s", a:category, sep)
-        let highlightCmd = printf("hi def Lf_hl_%s_%s", a:category, sep)
-        let highlightCmd .= printf(" guifg=%s guibg=%s", palette[dict.right].guibg, palette[dict.left].guibg)
-        let highlightCmd .= printf(" ctermfg=%s ctermbg=%s", palette[dict.right].ctermbg, palette[dict.left].ctermbg)
+        let sid_left = synIDtrans(hlID(s:HighlightGroup(a:category, dict.left)))
+        let sid_right = synIDtrans(hlID(s:HighlightGroup(a:category, dict.right)))
+        let hiCmd = printf("hi Lf_hl_popup_%s_%s", a:category, sep)
+        let hiCmd .= printf(" guifg=%s guibg=%s", synIDattr(sid_right, "bg", "gui"), synIDattr(sid_left, "bg", "gui"))
+        let hiCmd .= printf(" ctermfg=%s ctermbg=%s", synIDattr(sid_right, "bg", "cterm"), synIDattr(sid_right, "bg", "cterm"))
         if get(g:Lf_StlSeparator, "font", "") != ""
-            let highlightCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
+            let hiCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
         endif
-        exec highlightCmd
-        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
+        exec hiCmd
+        "let hi_group = printf("Lf_hl_%s_%s", a:category, sep)
+        "silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
     redrawstatus
 endfunction
 
-function! leaderf#colorscheme#popup#hiMatchMode(category, mode)
+" mode can be:
+" 1. Input mode
+" 2. Normal mode
+function! leaderf#colorscheme#popup#hiMode(category, mode) abort
+    if a:mode == 'Normal'
+        exec printf("hi link Lf_hl_popup_%s_mode Lf_hl_popup_normalMode", a:category)
+    else
+        exec printf("hi link Lf_hl_popup_%s_mode Lf_hl_popup_inputMode", a:category)
+    endif
+    let sid = synIDtrans(hlID(printf("Lf_hl_popup_%s_mode")))
+    exec printf("hi Lf_hl_popup_%s_sep0 guifg=%s", a:category, synIDattr(sid, "fg", "gui"))
+    exec printf("hi Lf_hl_popup_%s_sep0 ctermfg=%s", a:category, synIDattr(sid, "fg", "cterm"))
+endfunction
+
+" mode can be:
+" 1. NameOnly mode
+" 2. FullPath mode
+" 3. Fuzzy mode
+" 4. Regex mode
+function! leaderf#colorscheme#popup#hiMatchMode(category, mode) abort
+    let sid = synIDtrans(hlID(s:matchModeMap[a:mode]))
     exec printf("hi link Lf_hl_popup_%s_matchMode %s", a:category, s:matchModeMap[a:mode])
-    exec printf("hi Lf_hl_popup_%s_sep1 guibg=%s", a:category, s:palette[s:matchModeMap[a:mode]].guibg)
-    exec printf("hi Lf_hl_popup_%s_sep1 ctermbg=%s", a:category, s:palette[s:matchModeMap[a:mode]].ctermbg)
-    exec printf("hi Lf_hl_popup_%s_sep2 guifg=%s", a:category, s:palette[s:matchModeMap[a:mode]].guibg)
-    exec printf("hi Lf_hl_popup_%s_sep2 ctermfg=%s", a:category, s:palette[s:matchModeMap[a:mode]].ctermbg)
+    exec printf("hi Lf_hl_popup_%s_sep1 guibg=%s", a:category, synIDattr(sid, "bg", "gui"))
+    exec printf("hi Lf_hl_popup_%s_sep1 ctermbg=%s", a:category, synIDattr(sid, "bg", "cterm"))
+    exec printf("hi Lf_hl_popup_%s_sep2 guifg=%s", a:category, synIDattr(sid, "fg", "gui"))
+    exec printf("hi Lf_hl_popup_%s_sep2 ctermfg=%s", a:category, synIDattr(sid, "fg", "cterm"))
     redrawstatus
 endfunction
 
@@ -116,6 +118,7 @@ function! leaderf#colorscheme#popup#clear() abort
     highlight clear Lf_hl_popup_window
     highlight clear Lf_hl_popup_cursor
     highlight clear Lf_hl_popup_prompt
+    highlight clear Lf_hl_popup_spin
     highlight clear Lf_hl_popup_inputText
     highlight clear Lf_hl_popup_normalMode
     highlight clear Lf_hl_popup_inputMode
@@ -130,7 +133,8 @@ function! leaderf#colorscheme#popup#clear() abort
     highlight clear Lf_hl_popup_total
 endfunction
 
-function! leaderf#colorscheme#popup#load(name) abort
+function! leaderf#colorscheme#popup#load(category, name)
     call leaderf#colorscheme#popup#clear()
-    silent! call leaderf#colorscheme#popup#{a:name}#a_not_existing_function()
+    silent! call leaderf#colorscheme#popup#{a:name}#a_nonexistent_function()
+    call s:HighlightSeperator(a:category)
 endfunction

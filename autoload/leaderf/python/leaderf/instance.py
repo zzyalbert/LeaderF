@@ -256,6 +256,7 @@ class LfInstance(object):
 
     def _highlightStl(self):
         lfCmd("call leaderf#colorscheme#highlight('{}')".format(self._category))
+        lfCmd("call leaderf#colorscheme#popup#load('{}', '{}')".format(self._category, lfEval("get(g:, 'Lf_PopupColorscheme', 'default')")))
 
     def _setAttributes(self):
         lfCmd("setlocal nobuflisted")
