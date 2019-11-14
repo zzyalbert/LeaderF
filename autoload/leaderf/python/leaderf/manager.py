@@ -237,7 +237,7 @@ class Manager(object):
             category = self._getExplorer().getStlCategory()
             if category == 'Colorscheme':
                 category = 'Colors'
-            lfCmd("silent! call leaderf#%s#A_not_existing_function()" % category)
+            lfCmd("silent! call leaderf#%s#a_not_existing_function()" % category)
             self._vim_file_autoloaded = True
 
         if "--nowrap" in self._arguments:
