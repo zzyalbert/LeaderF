@@ -502,21 +502,20 @@ class LfInstance(object):
             lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
             lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
             lfCmd("call win_execute(%d, 'setlocal signcolumn=no')" % winid)
-            lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_input_text')" % winid)
+            lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_popup_inputText')" % winid)
             lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
             self._popup_instance.input_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage, line)
 
             if lfEval("get(g:, 'Lf_PopupShowStatusline', 1)") == '1':
                 statusline_win_options = {
-                        "maxwidth":        maxwidth,
-                        "minwidth":        maxwidth,
+                        "maxwidth":        maxwidth + 1,
+                        "minwidth":        maxwidth + 1,
                         "maxheight":       1,
                         "zindex":          20480,
                         "pos":             "topleft",
                         "line":            line + 1 + self._window_object.height,
                         "col":             col,
-                        "padding":         [0, 0, 0, 1],
                         "scrollbar":       0,
                         "mapping":         0,
                         }
@@ -538,7 +537,7 @@ class LfInstance(object):
                 lfCmd("call win_execute(%d, 'setlocal nocursorline')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal foldcolumn=0')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal signcolumn=no')" % winid)
-                lfCmd("call win_execute(%d, 'setlocal wincolor=Statusline')" % winid)
+                lfCmd("call win_execute(%d, 'setlocal wincolor=Lf_hl_popup_blank')" % winid)
                 lfCmd("call win_execute(%d, 'setlocal filetype=leaderf')" % winid)
 
                 self._popup_instance.statusline_win = PopupWindow(winid, vim.buffers[buf_number], vim.current.tabpage, line + maxheight)
@@ -673,6 +672,70 @@ class LfInstance(object):
     def useLastReverseOrder(self):
         self._reverse_order = self._last_reverse_order
 
+    def setPopupStl(self, current_mode):
+        statusline_win = self._popup_instance.statusline_win
+        if not statusline_win:
+            return
+
+        sep = lfEval("g:Lf_StlSeparator.left")
+        sep_len = lfBytesLen(sep)
+        match_mode = lfEval("g:Lf_{}_StlMode".format(self._category))
+        cwd = lfEval("g:Lf_{}_StlCwd".format(self._category))
+
+        text = " {} {} {} {} {} {} {} {}".format(current_mode, sep,
+                                                 self._category, sep,
+                                                 match_mode, sep,
+                                                 cwd, sep
+                                                 )
+        sep0_start = len(current_mode) + 3
+        category_start = sep0_start + sep_len
+        category_len = len(self._category) + 2
+        sep1_start = category_start + category_len
+        match_mode_start = sep1_start + sep_len
+        match_mode_len = len(match_mode) + 2
+        sep2_start = match_mode_start + match_mode_len
+        cwd_start = sep2_start + sep_len
+        cwd_len = len(cwd) + 2
+        sep3_start = cwd_start + cwd_len
+
+        if self._win_pos == 'popup':
+            lfCmd("""call popup_settext(%d, '%s')""" % (statusline_win.id, escQuote(text)))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_mode'})")""" % (statusline_win.id, self._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_popup_%s_mode'})")"""
+                    % (statusline_win.id, len(current_mode) + 2, self._category))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep0'})")""" % (statusline_win.id, self._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep0'})")"""
+                    % (statusline_win.id, sep0_start, sep_len, self._category))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_category'})")""" % (statusline_win.id))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_category'})")"""
+                    % (statusline_win.id, category_start, category_len))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep1'})")""" % (statusline_win.id, self._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep1'})")"""
+                    % (statusline_win.id, sep1_start, sep_len, self._category))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_matchMode'})")""" % (statusline_win.id, self._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_matchMode'})")"""
+                    % (statusline_win.id, match_mode_start, match_mode_len, self._category))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep2'})")""" % (statusline_win.id, self._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep2'})")"""
+                    % (statusline_win.id, sep2_start, sep_len, self._category))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_cwd'})")""" % (statusline_win.id))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_cwd'})")"""
+                    % (statusline_win.id, cwd_start, cwd_len))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep3'})")""" % (statusline_win.id, self._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep3'})")"""
+                    % (statusline_win.id, sep3_start, sep_len, self._category))
+        elif self._win_pos == 'floatwin':
+            pass
+
+
     def setStlCategory(self, category):
         lfCmd("let g:Lf_{}_StlCategory = '{}'".format(self._category, category) )
 
@@ -691,7 +754,7 @@ class LfInstance(object):
         if check_ignored and self._cur_buffer_name_ignored:
             count -= 1
         lfCmd("let g:Lf_{}_StlResultsCount = '{}'".format(self._category, count))
-        if lfEval("has('nvim')") == '1':
+        if lfEval("has('nvim')") == '1' and self._win_pos != 'floatwin':
             lfCmd("redrawstatus")
 
         if self._win_pos in ('popup', 'floatwin'):

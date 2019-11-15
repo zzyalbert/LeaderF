@@ -227,6 +227,8 @@ class Manager(object):
 
         self._getInstance().setStlMode(mode)
         self._cli.setCurrentMode(mode)
+        if self._getInstance().getWinPos() in ('popup', 'floatwin'):
+            lfCmd("call leaderf#colorscheme#popup#hiMatchMode('%s', '%s')" % (self._getExplorer().getStlCategory(), mode))
 
     def _beforeEnter(self):
         self._resetAutochdir()
@@ -1870,6 +1872,12 @@ class Manager(object):
 
         self._cleanup()
 
+        if kwargs.get('bang', 0):
+            self._current_mode = 'Normal'
+        else:
+            self._current_mode = 'Input'
+        lfCmd("call leaderf#colorscheme#popup#hiMode('%s', '%s')" % (self._getExplorer().getStlCategory(), self._current_mode))
+
         # lfCmd("echohl WarningMsg | redraw | echo ' searching ...' | echohl NONE")
         self._getInstance().setArguments(self._arguments)
         empty_query = self._empty_query and self._getExplorer().getStlCategory() in ["File"]
@@ -1907,6 +1915,8 @@ class Manager(object):
         self._getInstance().setStlCategory(self._getExplorer().getStlCategory())
         self._setStlMode(**kwargs)
         self._getInstance().setStlCwd(self._getExplorer().getStlCurDir())
+
+        self._getInstance().setPopupStl(self._current_mode)
 
         if not remember_last_status:
             self._gotoFirstLine()
@@ -2177,6 +2187,10 @@ class Manager(object):
     @modifiableController
     def input(self):
         self._current_mode = 'Input'
+        if self._getInstance().getWinPos() in ('popup', 'floatwin'):
+            self._cli._buildPopupPrompt()
+            lfCmd("call leaderf#colorscheme#popup#hiMode('%s', '%s')" % (self._getExplorer().getStlCategory(), self._current_mode))
+            self._getInstance().setPopupStl(self._current_mode)
 
         if self._getInstance().getWinPos() == 'popup':
             lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')"
@@ -2212,6 +2226,9 @@ class Manager(object):
                 self._search(cur_content)
             elif equal(cmd, '<Mode>'):
                 self._setStlMode()
+                if self._getInstance().getWinPos() in ('popup', 'floatwin'):
+                    self._getInstance().setPopupStl(self._current_mode)
+
                 if self._getInstance().isReverseOrder():
                     lfCmd("normal! G")
                 else:
@@ -2287,6 +2304,8 @@ class Manager(object):
 
                 if self._getInstance().getWinPos() in ('popup', 'floatwin'):
                     self._cli._buildPopupPrompt()
+                    lfCmd("call leaderf#colorscheme#popup#hiMode('%s', '%s')" % (self._getExplorer().getStlCategory(), self._current_mode))
+                    self._getInstance().setPopupStl(self._current_mode)
 
                 break
             elif equal(cmd, '<F5>'):

@@ -217,23 +217,33 @@ class LfCli(object):
         # print(text[part2_start:], lfBytesLen(text[:part2_start]), lfBytesLen(text[:sep1_start]), text[sep1_start:],lfBytesLen(sep))
         if self._instance.getWinPos() == 'popup':
             lfCmd("""call popup_settext(%d, '%s')""" % (input_window.id, escQuote(text)))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_prompt'})")""" % input_window.id)
-            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_prompt'})")""" % (input_window.id, len(prompt)))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_cursor'})")""" % input_window.id)
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_cursor'})")""" % (input_window.id, len(prompt)+self._cursor_pos+1))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlTotal'})")""" % (input_window.id, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlTotal'})")"""
-                    % (input_window.id, lfBytesLen(text[:part3_start]), len(part3) + 3, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlSeparator5'})")""" % (input_window.id, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlSeparator5'})")"""
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_prompt'})")""" % input_window.id)
+            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_popup_prompt'})")""" % (input_window.id, len(prompt)))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_cursor'})")""" % input_window.id)
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_popup_cursor'})")""" % (input_window.id, len(prompt)+self._cursor_pos+1))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_total'})")""" % (input_window.id))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_total'})")"""
+                    % (input_window.id, lfBytesLen(text[:part3_start]), len(part3) + 3))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep5'})")""" % (input_window.id, self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep5'})")"""
                     % (input_window.id, lfBytesLen(text[:sep2_start]), lfBytesLen(sep), self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlLineInfo'})")""" % (input_window.id, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlLineInfo'})")"""
-                    % (input_window.id, lfBytesLen(text[:part2_start]), len(part2) + 2, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_%s_stlSeparator4'})")""" % (input_window.id, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_%s_stlSeparator4'})")"""
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_lineInfo'})")""" % (input_window.id))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_lineInfo'})")"""
+                    % (input_window.id, lfBytesLen(text[:part2_start]), len(part2) + 2))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep4'})")""" % (input_window.id, self._instance._category))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep4'})")"""
                     % (input_window.id, lfBytesLen(text[:sep1_start]), lfBytesLen(sep), self._instance._category))
+
+            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_spin'})")""" % (input_window.id))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_spin'})")"""
+                    % (input_window.id, lfBytesLen(text[:spin_start]), len(spin)+3))
+
             lfCmd("redraw")
         else:
             self._instance._popup_instance.input_win.buffer[0] = text
@@ -258,8 +268,10 @@ class LfCli(object):
         else:
             if self._blinkon:
                 lfCmd("hi! default link Lf_hl_cursor Cursor")
+                lfCmd("hi! default link Lf_hl_popup_cursor Cursor")
             else:
                 lfCmd("hi! default link Lf_hl_cursor NONE")
+                lfCmd("hi! default link Lf_hl_popup_cursor NONE")
 
             if lfEval("g:Lf_CursorBlink") == '1':
                 self._start_time = datetime.now()

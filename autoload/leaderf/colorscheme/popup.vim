@@ -55,34 +55,45 @@ endfunction
 function! s:HighlightSeperator(category) abort
     exec printf("highlight link Lf_hl_popup_%s_mode Lf_hl_popup_inputMode", a:category)
     exec printf("highlight link Lf_hl_popup_%s_matchMode %s", a:category, s:matchModeMap[g:Lf_DefaultMode])
+    let hi_group = printf("Lf_hl_popup_%s_mode", a:category)
+    silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
+    let hi_group = printf("Lf_hl_popup_%s_matchMode", a:category)
+    silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     for [sep, dict] in items(s:leftSep)
         let sid_left = synIDtrans(hlID(s:HighlightGroup(a:category, dict.left)))
         let sid_right = synIDtrans(hlID(s:HighlightGroup(a:category, dict.right)))
+        let left_guibg = synIDattr(sid_left, "bg", "gui")
+        let left_ctermbg = synIDattr(sid_left, "bg", "cterm")
+        let right_guibg = synIDattr(sid_right, "bg", "gui")
+        let right_ctermbg = synIDattr(sid_right, "bg", "cterm")
         let hiCmd = printf("hi Lf_hl_popup_%s_%s", a:category, sep)
-        let hiCmd .= printf(" guifg=%s guibg=%s", synIDattr(sid_left, "bg", "gui"), synIDattr(sid_right, "bg", "gui"))
-        let hiCmd .= printf(" ctermfg=%s ctermbg=%s", synIDattr(sid_left, "bg", "cterm"), synIDattr(sid_right, "bg", "cterm"))
+        let hiCmd .= printf(" guifg=%s guibg=%s", left_guibg == '' ? 'NONE': left_guibg, right_guibg == '' ? 'NONE': right_guibg)
+        let hiCmd .= printf(" ctermfg=%s ctermbg=%s", left_ctermbg == '' ? 'NONE': left_ctermbg, right_ctermbg == '' ? 'NONE': right_ctermbg)
         if get(g:Lf_StlSeparator, "font", "") != ""
             let hiCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
         endif
         exec hiCmd
-        "let hi_group = printf("Lf_hl_popup_%s_%s", a:category, sep)
-        "silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
+        let hi_group = printf("Lf_hl_popup_%s_%s", a:category, sep)
+        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
 
     for [sep, dict] in items(s:rightSep)
         let sid_left = synIDtrans(hlID(s:HighlightGroup(a:category, dict.left)))
         let sid_right = synIDtrans(hlID(s:HighlightGroup(a:category, dict.right)))
+        let left_guibg = synIDattr(sid_left, "bg", "gui")
+        let left_ctermbg = synIDattr(sid_left, "bg", "cterm")
+        let right_guibg = synIDattr(sid_right, "bg", "gui")
+        let right_ctermbg = synIDattr(sid_right, "bg", "cterm")
         let hiCmd = printf("hi Lf_hl_popup_%s_%s", a:category, sep)
-        let hiCmd .= printf(" guifg=%s guibg=%s", synIDattr(sid_right, "bg", "gui"), synIDattr(sid_left, "bg", "gui"))
-        let hiCmd .= printf(" ctermfg=%s ctermbg=%s", synIDattr(sid_right, "bg", "cterm"), synIDattr(sid_right, "bg", "cterm"))
+        let hiCmd .= printf(" guifg=%s guibg=%s", right_guibg == '' ? 'NONE': right_guibg, left_guibg == '' ? 'NONE': left_guibg)
+        let hiCmd .= printf(" ctermfg=%s ctermbg=%s", right_ctermbg == '' ? 'NONE': right_ctermbg, left_ctermbg == '' ? 'NONE': left_ctermbg)
         if get(g:Lf_StlSeparator, "font", "") != ""
             let hiCmd .= printf(" font='%s'", g:Lf_StlSeparator["font"])
         endif
         exec hiCmd
-        "let hi_group = printf("Lf_hl_%s_%s", a:category, sep)
-        "silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
+        let hi_group = printf("Lf_hl_popup_%s_%s", a:category, sep)
+        silent! call prop_type_add(hi_group, {'highlight': hi_group, 'priority': 20})
     endfor
-    redrawstatus
 endfunction
 
 " mode can be:
@@ -94,9 +105,11 @@ function! leaderf#colorscheme#popup#hiMode(category, mode) abort
     else
         exec printf("hi link Lf_hl_popup_%s_mode Lf_hl_popup_inputMode", a:category)
     endif
-    let sid = synIDtrans(hlID(printf("Lf_hl_popup_%s_mode")))
-    exec printf("hi Lf_hl_popup_%s_sep0 guifg=%s", a:category, synIDattr(sid, "fg", "gui"))
-    exec printf("hi Lf_hl_popup_%s_sep0 ctermfg=%s", a:category, synIDattr(sid, "fg", "cterm"))
+    let sid = synIDtrans(hlID(printf("Lf_hl_popup_%s_mode", a:category)))
+    let guibg = synIDattr(sid, "bg", "gui")
+    let ctermbg = synIDattr(sid, "bg", "cterm")
+    exec printf("hi Lf_hl_popup_%s_sep0 guifg=%s", a:category, guibg == '' ? 'NONE': guibg)
+    exec printf("hi Lf_hl_popup_%s_sep0 ctermfg=%s", a:category, ctermbg == '' ? 'NONE': ctermbg)
 endfunction
 
 " mode can be:
@@ -106,11 +119,13 @@ endfunction
 " 4. Regex mode
 function! leaderf#colorscheme#popup#hiMatchMode(category, mode) abort
     let sid = synIDtrans(hlID(s:matchModeMap[a:mode]))
+    let guibg = synIDattr(sid, "bg", "gui")
+    let ctermbg = synIDattr(sid, "bg", "cterm")
     exec printf("hi link Lf_hl_popup_%s_matchMode %s", a:category, s:matchModeMap[a:mode])
-    exec printf("hi Lf_hl_popup_%s_sep1 guibg=%s", a:category, synIDattr(sid, "bg", "gui"))
-    exec printf("hi Lf_hl_popup_%s_sep1 ctermbg=%s", a:category, synIDattr(sid, "bg", "cterm"))
-    exec printf("hi Lf_hl_popup_%s_sep2 guifg=%s", a:category, synIDattr(sid, "fg", "gui"))
-    exec printf("hi Lf_hl_popup_%s_sep2 ctermfg=%s", a:category, synIDattr(sid, "fg", "cterm"))
+    exec printf("hi Lf_hl_popup_%s_sep1 guibg=%s", a:category, guibg == '' ? 'NONE': guibg)
+    exec printf("hi Lf_hl_popup_%s_sep1 ctermbg=%s", a:category, ctermbg == '' ? 'NONE': ctermbg)
+    exec printf("hi Lf_hl_popup_%s_sep2 guifg=%s", a:category, guibg == '' ? 'NONE': guibg)
+    exec printf("hi Lf_hl_popup_%s_sep2 ctermfg=%s", a:category, ctermbg == '' ? 'NONE': ctermbg)
     redrawstatus
 endfunction
 
@@ -133,8 +148,28 @@ function! leaderf#colorscheme#popup#clear() abort
     highlight clear Lf_hl_popup_total
 endfunction
 
+function! s:AddPropType() abort
+    silent! call prop_type_add("Lf_hl_popup_window", {'highlight': "Lf_hl_popup_window", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_cursor", {'highlight': "Lf_hl_popup_cursor", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_prompt", {'highlight': "Lf_hl_popup_prompt", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_spin", {'highlight': "Lf_hl_popup_spin", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_inputText", {'highlight': "Lf_hl_popup_inputText", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_normalMode", {'highlight': "Lf_hl_popup_normalMode", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_inputMode", {'highlight': "Lf_hl_popup_inputMode", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_category", {'highlight': "Lf_hl_popup_category", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_nameOnlyMode", {'highlight': "Lf_hl_popup_nameOnlyMode", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_fullPathMode", {'highlight': "Lf_hl_popup_fullPathMode", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_fuzzyMode", {'highlight': "Lf_hl_popup_fuzzyMode", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_regexMode", {'highlight': "Lf_hl_popup_regexMode", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_cwd", {'highlight': "Lf_hl_popup_cwd", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_blank", {'highlight': "Lf_hl_popup_blank", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_lineInfo", {'highlight': "Lf_hl_popup_lineInfo", 'priority': 20})
+    silent! call prop_type_add("Lf_hl_popup_total", {'highlight': "Lf_hl_popup_total", 'priority': 20})
+endfunction
+
 function! leaderf#colorscheme#popup#load(category, name)
     call leaderf#colorscheme#popup#clear()
     silent! call leaderf#colorscheme#popup#{a:name}#a_nonexistent_function()
+    call s:AddPropType()
     call s:HighlightSeperator(a:category)
 endfunction
