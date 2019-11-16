@@ -473,14 +473,13 @@ class LfInstance(object):
             self._popup_instance.content_win = self._window_object
 
             input_win_options = {
-                    "maxwidth":        maxwidth,
-                    "minwidth":        maxwidth,
+                    "maxwidth":        maxwidth + 1,
+                    "minwidth":        maxwidth + 1,
                     "maxheight":       1,
                     "zindex":          20480,
                     "pos":             "topleft",
                     "line":            line,
                     "col":             col,
-                    "padding":         [0, 0, 0, 1],
                     "scrollbar":       0,
                     "mapping":         0,
                     }

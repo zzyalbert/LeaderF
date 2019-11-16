@@ -165,11 +165,11 @@ class LfCli(object):
     def _buildPopupPrompt(self):
         if self._is_fuzzy:
             if self._is_full_path:
-                prompt = '>F> '
+                prompt = ' >F> '
             else:
-                prompt = '>>> '
+                prompt = ' >>> '
         else:
-            prompt = 'R>> '
+            prompt = ' R>> '
 
         pattern = ''.join(self._cmdline)
         input_window = self._instance.getPopupInstance().input_win
@@ -199,7 +199,7 @@ class LfCli(object):
             input_win_width += 2 * (len(sep) - int(lfEval("strdisplaywidth('%s')" % escQuote(sep))))
             if spin == '×':
                 input_win_width += len(spin) - int(lfEval("strdisplaywidth('%s')" % spin))
-        part3_start = input_win_width - 1 - len(part3) - 2
+        part3_start = input_win_width - len(part3) - 2
         sep2_start = part3_start - len(sep)
         part2_start = sep2_start - 2 - len(part2)
         sep1_start = part2_start - len(sep)
