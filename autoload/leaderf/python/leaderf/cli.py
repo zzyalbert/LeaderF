@@ -215,8 +215,6 @@ class LfCli(object):
                                                                                part1_width=part1_width,
                                                                                part2_width=len(part2),
                                                                                part3_width=len(part3))
-        # print(text[sep2_start:], lfBytesLen(text[:sep2_start]), lfBytesLen(text[:part3_start]), text[part3_start:],lfBytesLen(sep))
-        # print(text[part2_start:], lfBytesLen(text[:part2_start]), lfBytesLen(text[:sep1_start]), text[sep1_start:],lfBytesLen(sep))
         if self._instance.getWinPos() == 'popup':
             lfCmd("""call popup_settext(%d, '%s')""" % (input_window.id, escQuote(text)))
 
@@ -228,23 +226,24 @@ class LfCli(object):
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_total'})")""" % (input_window.id))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_total'})")"""
-                    % (input_window.id, lfBytesLen(text[:part3_start]), len(part3) + 3))
+                    % (input_window.id, lfBytesLen(text[:part3_start]) + 1, len(part3) + 2))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep5'})")""" % (input_window.id, self._instance._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep5'})")"""
-                    % (input_window.id, lfBytesLen(text[:sep2_start]), lfBytesLen(sep), self._instance._category))
+                    % (input_window.id, lfBytesLen(text[:sep2_start]) + 1, lfBytesLen(sep), self._instance._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_lineInfo'})")""" % (input_window.id))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_lineInfo'})")"""
-                    % (input_window.id, lfBytesLen(text[:part2_start]), len(part2) + 2))
+                    % (input_window.id, lfBytesLen(text[:part2_start]) + 1, len(part2) + 2))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep4'})")""" % (input_window.id, self._instance._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep4'})")"""
-                    % (input_window.id, lfBytesLen(text[:sep1_start]), lfBytesLen(sep), self._instance._category))
+                    % (input_window.id, lfBytesLen(text[:sep1_start]) + 1, lfBytesLen(sep), self._instance._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_spin'})")""" % (input_window.id))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_spin'})")"""
-                    % (input_window.id, lfBytesLen(text[:spin_start]), len(spin)+3))
+            if spin != "":
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_spin'})")"""
+                        % (input_window.id, lfBytesLen(text[:spin_start]) + 1, lfBytesLen(spin)))
 
             lfCmd("redraw")
         else:

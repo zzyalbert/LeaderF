@@ -10,7 +10,7 @@
 highlight def link Lf_hl_popup_window       Pmenu
 highlight def link Lf_hl_popup_cursor             Cursor
 highlight def link Lf_hl_popup_prompt             Constant
-highlight Lf_hl_popup_spin cterm=bold ctermfg=Red            
+highlight Lf_hl_popup_spin cterm=bold ctermfg=Red gui=bold guifg=Red guibg=Blue
 highlight def link Lf_hl_popup_inputText         Statusline
 highlight def link Lf_hl_popup_normalMode   Error
 highlight def link Lf_hl_popup_inputMode    Lf_hl_File_stlName

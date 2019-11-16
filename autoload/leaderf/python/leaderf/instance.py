@@ -686,15 +686,15 @@ class LfInstance(object):
                                                  match_mode, sep,
                                                  cwd, sep
                                                  )
-        sep0_start = len(current_mode) + 3
+        sep0_start = lfBytesLen(current_mode) + 3
         category_start = sep0_start + sep_len
-        category_len = len(self._category) + 2
+        category_len = lfBytesLen(self._category) + 2
         sep1_start = category_start + category_len
         match_mode_start = sep1_start + sep_len
-        match_mode_len = len(match_mode) + 2
+        match_mode_len = lfBytesLen(match_mode) + 2
         sep2_start = match_mode_start + match_mode_len
         cwd_start = sep2_start + sep_len
-        cwd_len = len(cwd) + 2
+        cwd_len = lfBytesLen(cwd) + 2
         sep3_start = cwd_start + cwd_len
 
         if self._win_pos == 'popup':
@@ -702,7 +702,7 @@ class LfInstance(object):
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_mode'})")""" % (statusline_win.id, self._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_popup_%s_mode'})")"""
-                    % (statusline_win.id, len(current_mode) + 2, self._category))
+                    % (statusline_win.id, lfBytesLen(current_mode) + 2, self._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep0'})")""" % (statusline_win.id, self._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep0'})")"""
