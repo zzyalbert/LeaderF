@@ -197,6 +197,8 @@ class LfCli(object):
 
         if sys.version_info < (3, 0):
             input_win_width += 2 * (len(sep) - int(lfEval("strdisplaywidth('%s')" % escQuote(sep))))
+            if spin == '×':
+                input_win_width += len(spin) - int(lfEval("strdisplaywidth('%s')" % spin))
         part3_start = input_win_width - 1 - len(part3) - 2
         sep2_start = part3_start - len(sep)
         part2_start = sep2_start - 2 - len(part2)
