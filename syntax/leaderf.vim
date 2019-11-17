@@ -30,10 +30,7 @@ if has("syntax")
     highlight def Lf_hl_cursorline guifg=Yellow ctermfg=226
     highlight def link Lf_hl_help               comment
     highlight def link Lf_hl_helpCmd            Identifier
-    highlight def link Lf_hl_popup_window       Pmenu
     highlight def link Lf_hl_cursor             Cursor
-    highlight def link Lf_hl_prompt             Constant
-    highlight def link Lf_hl_input_text         Statusline
     if &background ==? "dark"
         highlight def Lf_hl_match  gui=bold guifg=SpringGreen cterm=bold ctermfg=48
         highlight def Lf_hl_match0 gui=bold guifg=SpringGreen cterm=bold ctermfg=48
@@ -51,8 +48,6 @@ if has("syntax")
         highlight def Lf_hl_match4 gui=bold guifg=#F70505 cterm=bold ctermfg=196
         highlight def Lf_hl_matchRefine  gui=bold guifg=Magenta cterm=bold ctermfg=201
     endif
-    silent! call prop_type_add('Lf_hl_cursor', {'highlight': 'Lf_hl_cursor', 'priority': 20})
-    silent! call prop_type_add('Lf_hl_prompt', {'highlight': 'Lf_hl_prompt', 'priority': 20})
     highlight def link Lf_hl_bufNumber          Constant
     highlight def link Lf_hl_bufIndicators      Statement
     highlight def link Lf_hl_bufModified        String
