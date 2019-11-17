@@ -96,6 +96,38 @@ function! s:HighlightSeperator(category) abort
     endfor
 endfunction
 
+" https://github.com/vim/vim/issues/5227
+" same as `hi link` but filter out the `reverse` attribute
+function! leaderf#colorscheme#popup#link_no_reverse(from, to) abort
+    let sid = synIDtrans(hlID(a:to))
+    if synIDattr(sid, "reverse") || synIDattr(sid, "inverse")
+        let guibg = synIDattr(sid, "fg", "gui")
+        let guifg = synIDattr(sid, "bg", "gui")
+        let ctermbg = synIDattr(sid, "fg", "cterm")
+        let ctermfg = synIDattr(sid, "bg", "cterm")
+    else
+        let guibg = synIDattr(sid, "bg", "gui")
+        let guifg = synIDattr(sid, "fg", "gui")
+        let ctermbg = synIDattr(sid, "bg", "cterm")
+        let ctermfg = synIDattr(sid, "fg", "cterm")
+    endif
+    let bold = synIDattr(sid, "bold") ? "bold" : ""
+    let italic = synIDattr(sid, "italic") ? "italic" : ""
+    if bold == "" && italic == ""
+        let attr = "gui=NONE cterm=NONE"
+    elseif bold == "bold" && italic == "italic"
+        let attr = "gui=bold,italic cterm=bold,italic"
+    elseif bold == "bold"
+        let attr = "gui=bold cterm=bold"
+    else
+        let attr = "gui=italic cterm=italic"
+    endif
+    let hiCmd = printf("hi %s %s", a:from, attr)
+    let hiCmd .= printf(" guifg=%s guibg=%s", guifg == '' ? 'NONE': guifg, guibg == '' ? 'NONE': guibg)
+    let hiCmd .= printf(" ctermfg=%s ctermbg=%s", ctermfg == '' ? 'NONE': ctermfg, ctermbg == '' ? 'NONE': ctermbg)
+    exec hiCmd
+endfunction
+
 " mode can be:
 " 1. Input mode
 " 2. Normal mode
