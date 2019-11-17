@@ -181,7 +181,8 @@ endfunction
 
 function! s:AddPropType() abort
     silent! call prop_type_add("Lf_hl_popup_window", {'highlight': "Lf_hl_popup_window", 'priority': 20})
-    silent! call prop_type_add("Lf_hl_popup_cursor", {'highlight': "Lf_hl_popup_cursor", 'priority': 20})
+    highlight link Lf_hl_cursor Cursor
+    silent! call prop_type_add("Lf_hl_popup_cursor", {'highlight': "Lf_hl_cursor", 'priority': 20})
     silent! call prop_type_add("Lf_hl_popup_prompt", {'highlight': "Lf_hl_popup_prompt", 'priority': 20})
     silent! call prop_type_add("Lf_hl_popup_spin", {'highlight': "Lf_hl_popup_spin", 'priority': 20})
     silent! call prop_type_add("Lf_hl_popup_inputText", {'highlight': "Lf_hl_popup_inputText", 'priority': 20})
