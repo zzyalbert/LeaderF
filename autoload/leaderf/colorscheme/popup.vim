@@ -158,7 +158,6 @@ function! leaderf#colorscheme#popup#hiMatchMode(category, mode) abort
     exec printf("hi Lf_hl_popup_%s_sep1 ctermbg=%s", a:category, ctermbg == '' ? 'NONE': ctermbg)
     exec printf("hi Lf_hl_popup_%s_sep2 guifg=%s", a:category, guibg == '' ? 'NONE': guibg)
     exec printf("hi Lf_hl_popup_%s_sep2 ctermfg=%s", a:category, ctermbg == '' ? 'NONE': ctermbg)
-    redrawstatus
 endfunction
 
 function! leaderf#colorscheme#popup#clear() abort

@@ -209,6 +209,7 @@ class LfInstance(object):
         self._win_height = float(lfEval("g:Lf_WindowHeight"))
         self._show_tabline = int(lfEval("&showtabline"))
         self._is_autocmd_set = False
+        self._is_colorscheme_autocmd_set = False
         self._reverse_order = lfEval("get(g:, 'Lf_ReverseOrder', 0)") == '1'
         self._last_reverse_order = self._reverse_order
         self._orig_pos = () # (tabpage, window, buffer)
@@ -318,6 +319,13 @@ class LfInstance(object):
                     return
             else:
                 self._popup_instance.close()
+
+        if not self._is_colorscheme_autocmd_set:
+            self._is_colorscheme_autocmd_set = True
+            lfCmd("augroup Lf_Popup_{}_Colorscheme".format(self._category))
+            lfCmd("autocmd ColorScheme * call leaderf#colorscheme#popup#load('{}', '{}')".format(self._category,
+                    lfEval("get(g:, 'Lf_PopupColorscheme', 'default')")))
+            lfCmd("augroup END")
 
         buf_number = int(lfEval("bufadd('{}')".format(escQuote(self._buffer_name))))
 
