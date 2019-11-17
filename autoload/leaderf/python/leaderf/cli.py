@@ -219,26 +219,32 @@ class LfCli(object):
             lfCmd("""call popup_settext(%d, '%s')""" % (input_window.id, escQuote(text)))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_prompt'})")""" % input_window.id)
-            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_popup_prompt'})")""" % (input_window.id, len(prompt)))
+            lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_popup_prompt'})")"""
+                    % (input_window.id, len(prompt)))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_cursor'})")""" % input_window.id)
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_popup_cursor'})")""" % (input_window.id, len(prompt)+self._cursor_pos+1))
+            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': 1, 'type': 'Lf_hl_popup_cursor'})")"""
+                    % (input_window.id, len(prompt)+self._cursor_pos+1))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_total'})")""" % (input_window.id))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_total'})")"""
                     % (input_window.id, lfBytesLen(text[:part3_start]) + 1, len(part3) + 2))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep5'})")""" % (input_window.id, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep5'})")"""
-                    % (input_window.id, lfBytesLen(text[:sep2_start]) + 1, lfBytesLen(sep), self._instance._category))
+            if sep != "":
+                lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep5'})")"""
+                        % (input_window.id, self._instance._category))
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep5'})")"""
+                        % (input_window.id, lfBytesLen(text[:sep2_start]) + 1, lfBytesLen(sep), self._instance._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_lineInfo'})")""" % (input_window.id))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_lineInfo'})")"""
                     % (input_window.id, lfBytesLen(text[:part2_start]) + 1, len(part2) + 2))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep4'})")""" % (input_window.id, self._instance._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep4'})")"""
-                    % (input_window.id, lfBytesLen(text[:sep1_start]) + 1, lfBytesLen(sep), self._instance._category))
+            if sep != "":
+                lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep4'})")"""
+                        % (input_window.id, self._instance._category))
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep4'})")"""
+                        % (input_window.id, lfBytesLen(text[:sep1_start]) + 1, lfBytesLen(sep), self._instance._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_spin'})")""" % (input_window.id))
             if spin != "":
@@ -247,15 +253,42 @@ class LfCli(object):
 
             lfCmd("redraw")
         else:
-            self._instance._popup_instance.input_win.buffer[0] = text
+            input_window.buffer[0] = text
+
             if self._input_buf_namespace is None:
                 self._input_buf_namespace = int(lfEval("nvim_create_namespace('')"))
             else:
-                lfCmd("call nvim_buf_clear_namespace(%d, %d, 0, -1)" % (input_window.buffer.number, self._input_buf_namespace))
+                lfCmd("call nvim_buf_clear_namespace(%d, %d, 0, -1)"
+                        % (input_window.buffer.number, self._input_buf_namespace))
 
-            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_prompt', 0, 0, %d)" % (input_window.buffer.number, self._input_buf_namespace, len(prompt)))
-            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_cursor', 0, %d, %d+1)"
-                    % (input_window.buffer.number, self._input_buf_namespace, len(prompt)+self._cursor_pos, len(prompt)+self._cursor_pos))
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_prompt', 0, 0, %d)"
+                    % (input_window.buffer.number, self._input_buf_namespace, len(prompt)))
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_cursor', 0, %d, %d+1)"
+                    % (input_window.buffer.number, self._input_buf_namespace,
+                        len(prompt)+self._cursor_pos, len(prompt)+self._cursor_pos))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_total', 0, %d, %d)"
+                    % (input_window.buffer.number, self._input_buf_namespace,
+                        lfBytesLen(text[:part3_start]), lfBytesLen(text[:part3_start]) + len(part3) + 2))
+
+            if sep != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_sep5', 0, %d, %d)"
+                        % (input_window.buffer.number, self._input_buf_namespace, self._instance._category,
+                            lfBytesLen(text[:sep2_start]), lfBytesLen(text[:sep2_start]) + lfBytesLen(sep)))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_lineInfo', 0, %d, %d)"
+                    % (input_window.buffer.number, self._input_buf_namespace,
+                        lfBytesLen(text[:part2_start]), lfBytesLen(text[:part2_start]) + len(part2) + 2))
+
+            if sep != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_sep4', 0, %d, %d)"
+                        % (input_window.buffer.number, self._input_buf_namespace, self._instance._category,
+                            lfBytesLen(text[:sep1_start]), lfBytesLen(text[:sep1_start]) + lfBytesLen(sep)))
+
+            if spin != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_spin', 0, %d, %d)"
+                        % (input_window.buffer.number, self._input_buf_namespace,
+                            lfBytesLen(text[:spin_start]), lfBytesLen(text[:spin_start]) + lfBytesLen(spin)))
 
             lfCmd("redraw")
 

@@ -224,6 +224,7 @@ class LfInstance(object):
         self._popup_maxheight = 0
         self._popup_instance = LfPopupInstance()
         self._win_pos = None
+        self._stl_buf_namespace = None
         self._highlightStl()
 
     def _initStlVar(self):
@@ -403,7 +404,7 @@ class LfInstance(object):
             lfCmd("call nvim_win_set_option(%d, 'spell', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldenable', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'foldmethod', 'manual')" % winid)
-            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 1)" % winid)
+            lfCmd("call nvim_win_set_option(%d, 'foldcolumn', 0)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'signcolumn', 'no')" % winid)
             lfCmd("call nvim_win_set_option(%d, 'cursorline', v:false)" % winid)
             lfCmd("call nvim_win_set_option(%d, 'winhighlight',  'Normal:Lf_hl_input_text')" % winid)
@@ -694,7 +695,12 @@ class LfInstance(object):
                                                  match_mode, sep,
                                                  cwd, sep
                                                  )
-        sep0_start = lfBytesLen(current_mode) + 3
+        if self._win_pos == 'popup':
+            # prop_add() column starts from 1
+            sep0_start = lfBytesLen(current_mode) + 3
+        else:
+            # nvim_buf_add_highlight() column starts from 0
+            sep0_start = lfBytesLen(current_mode) + 2
         category_start = sep0_start + sep_len
         category_len = lfBytesLen(self._category) + 2
         sep1_start = category_start + category_len
@@ -712,36 +718,81 @@ class LfInstance(object):
             lfCmd("""call win_execute(%d, "call prop_add(1, 1, {'length': %d, 'type': 'Lf_hl_popup_%s_mode'})")"""
                     % (statusline_win.id, lfBytesLen(current_mode) + 2, self._category))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep0'})")""" % (statusline_win.id, self._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep0'})")"""
-                    % (statusline_win.id, sep0_start, sep_len, self._category))
+            if sep != "":
+                lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep0'})")""" % (statusline_win.id, self._category))
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep0'})")"""
+                        % (statusline_win.id, sep0_start, sep_len, self._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_category'})")""" % (statusline_win.id))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_category'})")"""
                     % (statusline_win.id, category_start, category_len))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep1'})")""" % (statusline_win.id, self._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep1'})")"""
-                    % (statusline_win.id, sep1_start, sep_len, self._category))
+            if sep != "":
+                lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep1'})")""" % (statusline_win.id, self._category))
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep1'})")"""
+                        % (statusline_win.id, sep1_start, sep_len, self._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_matchMode'})")""" % (statusline_win.id, self._category))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_matchMode'})")"""
                     % (statusline_win.id, match_mode_start, match_mode_len, self._category))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep2'})")""" % (statusline_win.id, self._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep2'})")"""
-                    % (statusline_win.id, sep2_start, sep_len, self._category))
+            if sep != "":
+                lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep2'})")""" % (statusline_win.id, self._category))
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep2'})")"""
+                        % (statusline_win.id, sep2_start, sep_len, self._category))
 
             lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_cwd'})")""" % (statusline_win.id))
             lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_cwd'})")"""
                     % (statusline_win.id, cwd_start, cwd_len))
 
-            lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep3'})")""" % (statusline_win.id, self._category))
-            lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep3'})")"""
-                    % (statusline_win.id, sep3_start, sep_len, self._category))
+            if sep != "":
+                lfCmd("""call win_execute(%d, "call prop_remove({'type': 'Lf_hl_popup_%s_sep3'})")""" % (statusline_win.id, self._category))
+                lfCmd("""call win_execute(%d, "call prop_add(1, %d, {'length': %d, 'type': 'Lf_hl_popup_%s_sep3'})")"""
+                        % (statusline_win.id, sep3_start, sep_len, self._category))
         elif self._win_pos == 'floatwin':
-            pass
+            statusline_win.buffer[0] = text
 
+            if self._stl_buf_namespace is None:
+                self._stl_buf_namespace = int(lfEval("nvim_create_namespace('')"))
+            else:
+                lfCmd("call nvim_buf_clear_namespace(%d, %d, 0, -1)"
+                        % (statusline_win.buffer.number, self._stl_buf_namespace))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_mode', 0, 0, %d)"
+                    % (statusline_win.buffer.number, self._stl_buf_namespace, self._category,
+                        lfBytesLen(current_mode) + 2))
+
+            if sep != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_sep0', 0, %d, %d)"
+                        % (statusline_win.buffer.number, self._stl_buf_namespace, self._category,
+                            sep0_start, sep0_start + sep_len))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_category', 0, %d, %d)"
+                    % (statusline_win.buffer.number, self._stl_buf_namespace,
+                        category_start, category_start + category_len))
+
+            if sep != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_sep1', 0, %d, %d)"
+                        % (statusline_win.buffer.number, self._stl_buf_namespace, self._category,
+                            sep1_start, sep1_start + sep_len))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_matchMode', 0, %d, %d)"
+                    % (statusline_win.buffer.number, self._stl_buf_namespace, self._category,
+                        match_mode_start, match_mode_start + match_mode_len))
+
+            if sep != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_sep2', 0, %d, %d)"
+                        % (statusline_win.buffer.number, self._stl_buf_namespace, self._category,
+                            sep2_start, sep2_start + sep_len))
+
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_cwd', 0, %d, %d)"
+                    % (statusline_win.buffer.number, self._stl_buf_namespace,
+                        cwd_start, cwd_start + cwd_len))
+
+            if sep != "":
+                lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_%s_sep3', 0, %d, %d)"
+                        % (statusline_win.buffer.number, self._stl_buf_namespace, self._category,
+                            sep3_start, sep3_start + sep_len))
 
     def setStlCategory(self, category):
         lfCmd("let g:Lf_{}_StlCategory = '{}'".format(self._category, category) )
