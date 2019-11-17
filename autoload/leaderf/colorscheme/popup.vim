@@ -199,9 +199,30 @@ function! s:AddPropType() abort
     silent! call prop_type_add("Lf_hl_popup_total", {'highlight': "Lf_hl_popup_total", 'priority': 20})
 endfunction
 
+function! s:DefineMatchHighlight() abort
+    if &background ==? "dark"
+        highlight def Lf_hl_match  gui=bold guifg=SpringGreen cterm=bold ctermfg=48
+        highlight def Lf_hl_match0 gui=bold guifg=SpringGreen cterm=bold ctermfg=48
+        highlight def Lf_hl_match1 gui=bold guifg=#FE8019 cterm=bold ctermfg=208
+        highlight def Lf_hl_match2 gui=bold guifg=#3FF5D1 cterm=bold ctermfg=50
+        highlight def Lf_hl_match3 gui=bold guifg=#FF7272 cterm=bold ctermfg=203
+        highlight def Lf_hl_match4 gui=bold guifg=#43B9F0 cterm=bold ctermfg=74
+        highlight def Lf_hl_matchRefine  gui=bold guifg=Magenta cterm=bold ctermfg=201
+    else
+        highlight def Lf_hl_match  gui=bold guifg=#1540AD cterm=bold ctermfg=26
+        highlight def Lf_hl_match0 gui=bold guifg=#1540AD cterm=bold ctermfg=26
+        highlight def Lf_hl_match1 gui=bold guifg=#A52A2A cterm=bold ctermfg=124
+        highlight def Lf_hl_match2 gui=bold guifg=#B52BB0 cterm=bold ctermfg=127
+        highlight def Lf_hl_match3 gui=bold guifg=#02781A cterm=bold ctermfg=28
+        highlight def Lf_hl_match4 gui=bold guifg=#F70505 cterm=bold ctermfg=196
+        highlight def Lf_hl_matchRefine  gui=bold guifg=Magenta cterm=bold ctermfg=201
+    endif
+endfunction
+
 function! leaderf#colorscheme#popup#load(category, name)
     call leaderf#colorscheme#popup#clear()
     silent! call leaderf#colorscheme#popup#{a:name}#a_nonexistent_function()
     call s:AddPropType()
     call s:HighlightSeperator(a:category)
+    call s:DefineMatchHighlight()
 endfunction

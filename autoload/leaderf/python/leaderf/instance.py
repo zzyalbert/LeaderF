@@ -321,13 +321,6 @@ class LfInstance(object):
             else:
                 self._popup_instance.close()
 
-        if not self._is_colorscheme_autocmd_set:
-            self._is_colorscheme_autocmd_set = True
-            lfCmd("augroup Lf_Popup_{}_Colorscheme".format(self._category))
-            lfCmd("autocmd ColorScheme * call leaderf#colorscheme#popup#load('{}', '{}')".format(self._category,
-                    lfEval("get(g:, 'Lf_PopupColorscheme', 'default')")))
-            lfCmd("augroup END")
-
         buf_number = int(lfEval("bufadd('{}')".format(escQuote(self._buffer_name))))
 
         width = int(lfEval("get(g:, 'Lf_PopupWidth', 0)"))
@@ -552,6 +545,13 @@ class LfInstance(object):
 
             lfCmd("call leaderf#ResetPopupOptions(%d, 'callback', function('leaderf#PopupClosed', [%s]))"
                     % (self._popup_winid, str(self._popup_instance.getWinIdList())))
+
+        if not self._is_colorscheme_autocmd_set:
+            self._is_colorscheme_autocmd_set = True
+            lfCmd("augroup Lf_Popup_{}_Colorscheme".format(self._category))
+            lfCmd("autocmd ColorScheme * call leaderf#colorscheme#popup#load('{}', '{}')".format(self._category,
+                    lfEval("get(g:, 'Lf_PopupColorscheme', 'default')")))
+            lfCmd("augroup END")
 
     def _createBufWindow(self, win_pos):
         self._win_pos = win_pos
