@@ -129,10 +129,10 @@ function! leaderf#colorscheme#popup#link_no_reverse(from, to) abort
 endfunction
 
 " mode can be:
-" 1. Input mode
-" 2. Normal mode
+" 1. INPUT mode
+" 2. NORMAL mode
 function! leaderf#colorscheme#popup#hiMode(category, mode) abort
-    if a:mode == 'Normal'
+    if a:mode == 'NORMAL'
         exec printf("hi link Lf_hl_popup_%s_mode Lf_hl_popup_normalMode", a:category)
     else
         exec printf("hi link Lf_hl_popup_%s_mode Lf_hl_popup_inputMode", a:category)
