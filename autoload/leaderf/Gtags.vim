@@ -68,19 +68,23 @@ function! leaderf#Gtags#NormalModeFilter(winid, key) abort
         call win_execute(a:winid, "norm! j")
         exec g:Lf_py "gtagsExplManager._cli._buildPopupPrompt()"
         redraw
+        exec g:Lf_py "gtagsExplManager._getInstance().refreshPopupStatusline()"
         exec g:Lf_py "gtagsExplManager._previewResult(False)"
     elseif key == "k" || key ==? "<Up>"
         call win_execute(a:winid, "norm! k")
         exec g:Lf_py "gtagsExplManager._cli._buildPopupPrompt()"
         redraw
+        exec g:Lf_py "gtagsExplManager._getInstance().refreshPopupStatusline()"
         exec g:Lf_py "gtagsExplManager._previewResult(False)"
     elseif key ==? "<PageUp>"
         call win_execute(a:winid, "norm! \<PageUp>")
         exec g:Lf_py "gtagsExplManager._cli._buildPopupPrompt()"
+        exec g:Lf_py "gtagsExplManager._getInstance().refreshPopupStatusline()"
         exec g:Lf_py "gtagsExplManager._previewResult(False)"
     elseif key ==? "<PageDown>"
         call win_execute(a:winid, "norm! \<PageDown>")
         exec g:Lf_py "gtagsExplManager._cli._buildPopupPrompt()"
+        exec g:Lf_py "gtagsExplManager._getInstance().refreshPopupStatusline()"
         exec g:Lf_py "gtagsExplManager._previewResult(False)"
     elseif key ==? "<LeftMouse>"
         if has('patch-8.1.2266')
@@ -94,10 +98,12 @@ function! leaderf#Gtags#NormalModeFilter(winid, key) abort
         call win_execute(a:winid, "norm! 3k")
         exec g:Lf_py "gtagsExplManager._cli._buildPopupPrompt()"
         redraw
+        exec g:Lf_py "gtagsExplManager._getInstance().refreshPopupStatusline()"
     elseif key ==? "<ScrollWheelDown>"
         call win_execute(a:winid, "norm! 3j")
         exec g:Lf_py "gtagsExplManager._cli._buildPopupPrompt()"
         redraw
+        exec g:Lf_py "gtagsExplManager._getInstance().refreshPopupStatusline()"
     elseif key == "q" || key ==? "<ESC>"
         exec g:Lf_py "gtagsExplManager.quit()"
     elseif key == "i" || key ==? "<Tab>"

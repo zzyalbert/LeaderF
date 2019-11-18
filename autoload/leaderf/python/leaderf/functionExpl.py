@@ -407,6 +407,7 @@ class FunctionExplManager(Manager):
                 lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')"
                         % (self._getInstance().getPopupWinId(), 'leaderf#PopupFilter'))
                 lfCmd("""call win_execute(%d, "exec 'norm! %dGzz'")""" % (self._getInstance().getPopupWinId(), int(index)))
+                self._getInstance().refreshPopupStatusline()
 
                 if lfEval("exists('*leaderf#%s#NormalModeFilter')" % self._getExplorer().getStlCategory()) == '1':
                     lfCmd("call leaderf#ResetPopupOptions(%d, 'filter', '%s')" % (self._getInstance().getPopupWinId(),

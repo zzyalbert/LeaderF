@@ -1005,11 +1005,10 @@ class LfInstance(object):
     def refreshPopupStatusline(self):
         statusline_win = self._popup_instance.statusline_win
         if self._win_pos == 'popup' and statusline_win:
-            if len(self._buffer_object) < self._popup_maxheight \
-                    or int(lfEval("popup_getpos(%d).line" % statusline_win.id)) != statusline_win.initialLine:
-                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (self._window_object.id, self._window_object.initialLine)) # trigger a redraw
-                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id,
-                        self._window_object.initialLine + self._window_object.height))
+            lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (self._popup_winid, self._window_object.initialLine)) # trigger a redraw
+            expected_line = self._window_object.initialLine + self._window_object.height
+            if expected_line != int(lfEval("popup_getpos(%d).line" % statusline_win.id)):
+                lfCmd("call leaderf#ResetPopupOptions(%d, 'line', %d)" % (statusline_win.id, expected_line))
 
     def appendBuffer(self, content):
         self.buffer.options['modifiable'] = True
