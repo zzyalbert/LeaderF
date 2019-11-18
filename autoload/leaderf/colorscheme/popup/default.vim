@@ -20,7 +20,7 @@ highlight Lf_hl_popup_inputText guifg=#87ceeb guibg=#4d4d4d gui=NONE ctermfg=117
 call leaderf#colorscheme#popup#link_no_reverse("Lf_hl_popup_window", "Pmenu")
 
 call leaderf#colorscheme#popup#link_no_reverse("Lf_hl_popup_cursor", "Cursor")
-call leaderf#colorscheme#popup#link_no_reverse("Lf_hl_popup_prompt", "Constant")
+highlight Lf_hl_popup_prompt guifg=#ffcd4a guibg=NONE gui=NONE ctermfg=221 ctermbg=NONE cterm=NONE
 highlight Lf_hl_popup_spin guifg=#e6e666 guibg=NONE gui=NONE ctermfg=185 ctermbg=NONE cterm=NONE
 highlight Lf_hl_popup_normalMode guifg=#333300 guibg=#c1ce96 gui=bold ctermfg=58 ctermbg=187 cterm=bold
 highlight Lf_hl_popup_inputMode guifg=#003333 guibg=#98b3a5 gui=bold ctermfg=23 ctermbg=109 cterm=bold
