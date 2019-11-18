@@ -263,7 +263,7 @@ class LfCli(object):
 
             lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_prompt', 0, 0, %d)"
                     % (input_window.buffer.number, self._input_buf_namespace, len(prompt)))
-            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_popup_cursor', 0, %d, %d+1)"
+            lfCmd("call nvim_buf_add_highlight(%d, %d, 'Lf_hl_cursor', 0, %d, %d+1)"
                     % (input_window.buffer.number, self._input_buf_namespace,
                         len(prompt)+self._cursor_pos, len(prompt)+self._cursor_pos))
 
