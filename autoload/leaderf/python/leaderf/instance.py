@@ -307,7 +307,7 @@ class LfInstance(object):
         # `Leaderf file --popup` after `Leaderf file` without it.
         if self._window_object is not None and type(self._window_object) != type(vim.current.window)\
                 and isinstance(self._window_object, PopupWindow): # type is PopupWindow
-            if self._window_object.tabpage == vim.current.tabpage:
+            if self._window_object.tabpage == vim.current.tabpage and lfEval("get(g:, 'Lf_Popup_VimResized', 0)") == '0':
                 if self._popup_winid > 0 and self._window_object.valid: # invalid if cleared by popup_clear()
                     # clear the buffer first to avoid a flash
                     if lfEval("g:Lf_RememberLastSearch") == '0' \
@@ -319,6 +319,7 @@ class LfInstance(object):
                     self._popup_instance.show()
                     return
             else:
+                lfCmd("let g:Lf_Popup_VimResized = 0")
                 self._popup_instance.close()
 
         buf_number = int(lfEval("bufadd('{}')".format(escQuote(self._buffer_name))))
@@ -551,6 +552,7 @@ class LfInstance(object):
             lfCmd("augroup Lf_Popup_{}_Colorscheme".format(self._category))
             lfCmd("autocmd ColorScheme * call leaderf#colorscheme#popup#load('{}', '{}')".format(self._category,
                     lfEval("get(g:, 'Lf_PopupColorscheme', 'default')")))
+            lfCmd("autocmd VimResized * let g:Lf_Popup_VimResized = 1")
             lfCmd("augroup END")
 
     def _createBufWindow(self, win_pos):
