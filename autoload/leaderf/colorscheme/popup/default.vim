@@ -14,7 +14,7 @@
 " like use `reverse` attribute.
 
 " Lf_hl_popup_inputText is the wincolor of input window
-highlight Lf_hl_popup_inputText guifg=#87ceeb guibg=#4d4d4d
+highlight Lf_hl_popup_inputText guifg=#87ceeb guibg=#4d4d4d gui=NONE ctermfg=117 ctermbg=239 cterm=NONE
 
 " Lf_hl_popup_window is the wincolor of content window
 call leaderf#colorscheme#popup#link_no_reverse("Lf_hl_popup_window", "Pmenu")
