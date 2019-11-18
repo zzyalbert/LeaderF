@@ -249,6 +249,13 @@ class Manager(object):
                 lfCmd("call nvim_win_set_option(%d, 'wrap', v:false)" % self._getInstance().getPopupWinId())
             else:
                 self._getInstance().window.options['wrap'] = False
+        else:
+            if self._getInstance().getWinPos() == 'popup':
+                lfCmd("call win_execute(%d, 'setlocal wrap')" % self._getInstance().getPopupWinId())
+            elif self._getInstance().getWinPos() == 'floatwin':
+                lfCmd("call nvim_win_set_option(%d, 'wrap', v:true)" % self._getInstance().getPopupWinId())
+            else:
+                self._getInstance().window.options['wrap'] = True
 
         if self._getInstance().getWinPos() != 'popup':
             self._defineMaps()
