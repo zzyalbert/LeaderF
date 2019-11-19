@@ -710,6 +710,19 @@ g:Lf_PopupPreviewPosition                          *g:Lf_PopupPreviewPosition*
 
     Default value is 'top'.
 
+g:Lf_PopupColorscheme                              *g:Lf_PopupColorscheme*
+    You can configure the colorscheme of LeaderF in popup mode.
+    e.g. >
+    let g:Lf_PopupColorscheme = 'default'
+<
+    The colorscheme files can be found in the directory >
+    "LeaderF/autoload/leaderf/colorscheme/popup/"
+<
+    You can also define the colorscheme by yourself, follow 'default.vim' and
+    put it under "autoload/leaderf/colorscheme/popup/".
+
+    Default value is 'default'.
+
 ==============================================================================
 USAGE                                           *leaderf-usage*
 
