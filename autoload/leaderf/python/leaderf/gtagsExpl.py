@@ -484,7 +484,7 @@ class GtagsExplorer(Explorer):
                             self._accept_dotfiles, self._skip_unreadable, self._skip_symlink,
                             '--gtagsconf %s ' % self._gtagsconf if self._gtagsconf else "",
                             self._gtagslabel, filename, dbpath)
-                cmd = 'echo zzy'
+                cmd = 'echo -ne ""'
                 env = os.environ
                 # env["GTAGSFORCECPP"] = "" # lead to issue #489
                 subprocess.Popen(cmd, shell=True, env=env)
